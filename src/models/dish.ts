@@ -6,5 +6,5 @@ const dishSchema = new Schema({
 	restaurantId:{type:Schema.Types.ObjectId,required:true},
 });
 
-const Dish = mongoose.model('Dish',dishSchema);
+const Dish = model('Dish',dishSchema);
 export default Dish ;

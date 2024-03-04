@@ -1,10 +1,10 @@
-import {Schema,model} from 'mongoose'
+import { Schema, model } from 'mongoose';
 
-const restaurantSchema = Schema({
-	name:{type:String,required:true},
-	phone:{type:Number,required:true},
-	address:{type:Number}],
-})
+const restaurantSchema = new Schema({
+  name: { type: String, required: true },
+  phone: { type: Number, required: true },
+  address: { type: String }, // Corrected the type to String
+});
 
-const Restaurant = model('Restaurant',restaurantSchema);
+const Restaurant = model('Restaurant', restaurantSchema);
 export default Restaurant;

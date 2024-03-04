@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../index'
 import dbconnect from '../db/db'
 import mongoose from 'mongoose'
-
+import {generateMockData} from './load_dish_data';
 
   
 const clearDatabase = async () => {
@@ -14,11 +14,12 @@ const clearDatabase = async () => {
   }
 };
 
-beforeAll( async () => {
-	await dbconnect();
-	await clearDatabase();
+let testDish ;
+beforeAll(async () => {
+  await dbconnect();
+  await clearDatabase();
+  
 });
-
 afterAll( async () => {
 	await mongoose.connection.close();
 });
@@ -28,7 +29,7 @@ const exampleUser = {
 	  password: 'secure_password',
 	  phone: '123-456-7890'
 	};
-
+let token = ""
 describe('Test Signup -> login ' ,  () => {
 	it('should signup new user' , async () => {
 		const res = await request(app)
@@ -45,6 +46,7 @@ describe('Test Signup -> login ' ,  () => {
 			console.log('login response',res.body);
 			expect(res.status).toBe(200);
 			expect(res.body).toHaveProperty('token');
+			token = res.body.token ;
 	});
 	it('should return username error', async() =>{
 		const res = await request(app)
@@ -53,4 +55,17 @@ describe('Test Signup -> login ' ,  () => {
 			
 			expect(res.status).toBe(409);
 	})
+	
+	it('Should add items to cart',async() => {
+		const mockData = await generateMockData();
+		testDish = { itemId: mockData.dishes[0]._id, quantity: 1, forceAdd: 0 };
+		console.log('testDish',testDish);
+		const res = await request(app)
+			.post('/cart/add')
+			.set({Authorization:token})
+			.send(testDish)
+			
+			expect(res.status).toBe(201);
+	});
+		
 });

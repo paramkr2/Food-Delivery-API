@@ -20,14 +20,14 @@ export const login = async (req,res) => {
 				return res.status(401).json({'error':'Password doesnt match'})
 		}
 		
-		const token = jwt.sign({userid:user._id,username:username},
+		const token = jwt.sign({userId:user._id,username:username},
 			secretkey,
 			{expiresIn:'1h'}
 		);
 		
-		res.status(200).json({'token':token,msg:'Login Successfull'})
+		return res.status(200).json({'token':token,msg:'Login Successfull'})
 	}catch{
-		res.status(500).json({'error':'Internal server error'});
+		return res.status(500).json({'error':'Internal server error'});
 	}
 };
 
@@ -42,7 +42,7 @@ export const signup = async (req,res) => {
 		}
 		const hashedPassword = await bcrypt.hash(password, 10);
 		const user = await User.create({username,password:hashedPassword,email,phone}) // dont know about address 
-		const token = jwt.sign({userid:user._id,username:username},
+		const token = jwt.sign({userId:user._id,username:username},
 			secretkey,
 			{expiresIn:'1h'}
 		);
