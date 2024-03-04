@@ -22,6 +22,9 @@ export const addItem = async (req, res) => {
     }else if (userCart.restaurantId !== foodItem.restaurantId) {
       // If restaurants are different
 	 //userCart.dishes = [] ;
+	 if( !forceAdd ){
+		return res.status(405).json({message:'Resturant Mismatch'});
+	 }
 	 userCart.dishes.splice(0, userCart.dishes.length);
      userCart.restaurantId = foodItem.restaurantId;
     }

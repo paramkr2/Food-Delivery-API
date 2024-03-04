@@ -14,15 +14,16 @@ const clearDatabase = async () => {
   }
 };
 
-let testDish ;
+
 beforeAll(async () => {
   await dbconnect();
   await clearDatabase();
-  
-});
+},10000);
+
 afterAll( async () => {
 	await mongoose.connection.close();
 });
+
 const exampleUser = {
 	  username: 'john_doe',
 	  email: 'john.doe@example.com',
@@ -31,6 +32,7 @@ const exampleUser = {
 	};
 let token = ""
 describe('Test Signup -> login ' ,  () => {
+	let testDish1 ,testDish2 ;
 	it('should signup new user' , async () => {
 		const res = await request(app)
 			.post('/auth/signup')
@@ -58,13 +60,28 @@ describe('Test Signup -> login ' ,  () => {
 	
 	it('Should add items to cart',async() => {
 		const mockData = await generateMockData();
-		testDish = { itemId: mockData.dishes[0]._id, quantity: 1, forceAdd: 0 };
-		console.log('testDish',testDish);
+		testDish1 = { itemId: mockData.dishes[0]._id, quantity: 1, forceAdd: 0 };
+		testDish2 = { itemId: mockData.dishes[2]._id, quantity: 1, forceAdd: 0 };
 		const res = await request(app)
 			.post('/cart/add')
 			.set({Authorization:token})
-			.send(testDish)
-			
+			.send(testDish1)
+			expect(res.status).toBe(201);
+	});
+	
+	it('Should give error on diffrent resturant if not forceAdd', async () => {
+		const res = await request(app)
+			.post('/cart/add')
+			.set({Authorization:token})
+			.send(testDish2)
+			expect(res.status).toBe(405);
+	});
+	it('Should add on diffrent resturant if forceAdd', async () => {
+		testDish2.forceAdd = 1 
+		const res = await request(app)
+			.post('/cart/add')
+			.set({Authorization:token})
+			.send(testDish2)
 			expect(res.status).toBe(201);
 	});
 		
