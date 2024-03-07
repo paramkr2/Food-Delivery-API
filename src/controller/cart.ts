@@ -28,7 +28,6 @@ export const getItem = async (req, res) => {
 export const addItem = async (req, res) => {
   try {
     const userId = res.locals.userId;
-	console.log('In addItem userId:', userId)
     const { itemId, quantity, forceAdd } = req.body;
 
     // Check if item exists
@@ -69,7 +68,6 @@ export const addItem = async (req, res) => {
 
     return res.status(201).json({ msg: 'Food item added to cart' });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ msg: 'Internal Server Error', error });
   }
 };
@@ -99,4 +97,27 @@ export const removeItem = async (req,res) => {
 		return res.status(500).json({error:'Internal Server Error',more:err.toString()});
 		
 	}
+}
+
+export const updateItem = async (req,res) => {
+
+	try{
+		const {userId} = res.locals;
+		const {dishId,quantity} = req.body 
+		console.log(`In updateItem ${userId} , ${dishId} , ${quantity}`)
+		const cart = await Cart.findOne({userId})
+		
+		if(!cart){
+			return res.status(404).json({error:'Cart not found'})
+		}
+		await Cart.updateOne(
+			{userId,'dishes._id':dishId},
+			{$set:{'items.$.quantity':quantity}}
+		)
+		return res.status(200).json({msg:'Sucessfully Update'})
+	}catch(err){
+		console.log(err)
+		return res.status(500).json({error:'Internal Server Error'})
+	}
+	
 }

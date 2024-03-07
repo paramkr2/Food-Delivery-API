@@ -96,7 +96,17 @@ describe('Test Signup -> login ' ,  () => {
 			 const numberOfDishes = Object.keys(res.body.data).length;
 			expect(numberOfDishes).toBe(1);
 	});
-	
+	it('Should Update dish quantity',async() => {
+		const res = await request(app)
+			.put('/cart/update')
+			.set({Authorization:token})
+			.send({
+				dishId:testDish2.itemId,
+				quantity:10
+			})
+			
+			expect(res.status).toBe(200)
+	})
 	it('Should Remove dish from cart' , async() => {
 		const res = await request(app)
 			.delete('/cart/remove')
@@ -105,7 +115,8 @@ describe('Test Signup -> login ' ,  () => {
 			
 			console.log( 'Remove Item', res.body)
 			expect(res.status).toBe(200)
-			
 	});
+	
+	
 		
 });
