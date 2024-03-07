@@ -84,5 +84,28 @@ describe('Test Signup -> login ' ,  () => {
 			.send(testDish2)
 			expect(res.status).toBe(201);
 	});
+	
+	it('Should Fetch the added dishes', async () => {
+		const res = await request(app)
+			.get('/cart/fetch')
+			.set({Authorization:token})
+			
+			expect(res.status).toBe(200);
+			expect(res.body.data).toBeDefined();
+			
+			 const numberOfDishes = Object.keys(res.body.data).length;
+			expect(numberOfDishes).toBe(1);
+	});
+	
+	it('Should Remove dish from cart' , async() => {
+		const res = await request(app)
+			.delete('/cart/remove')
+			.set({Authorization:token})
+			.query({dishId:testDish2.itemId.toString()})
+			
+			console.log( 'Remove Item', res.body)
+			expect(res.status).toBe(200)
+			
+	});
 		
 });
