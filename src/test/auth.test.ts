@@ -32,7 +32,7 @@ const exampleUser = {
 	  location:{type:'Point',coordinates:[28.661057,77.211821]}
 	};
 let token = ""
-describe('Test Signup -> login ' ,  () => {
+describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	let testDish1 ,testDish2 ;
 	it('should signup new user' , async () => {
 		const res = await request(app)
@@ -126,6 +126,21 @@ describe('Test Signup -> login ' ,  () => {
 			.query(data)
 			
 			expect(res.status).toBe(200)
+	})
+	
+	it('Should confirm order and Delete Cart ' , async() => {
+		const res = await request(app)
+			.post('/cart/confirmOrder')
+			.set({Authorization:token})
+		expect(res.status).toBe(200)
+	})
+	
+	it('Should not confirm when cart empty' , async () => {
+		const res = await request(app)
+			.post('/cart/confirmOrder')
+			.set({Authorization:token})
+			
+		expect(res.status).toBe(404)
 	})
 	
 		
