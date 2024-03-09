@@ -1,25 +1,24 @@
 import { Document, Schema, model } from 'mongoose';
 
-// Define an interface for the Restaurant document
-interface IRestaurant extends Document {
+interface IDriver extends Document {
   name: string;
-  phone: number;
+  availability: boolean;
   location: {
     type: string;
     coordinates: [number, number];
   };
 }
 
-const restaurantSchema = new Schema<IRestaurant>({
+const driverSchema = new Schema<IDriver>({
   name: { type: String, required: true },
-  phone: { type: Number, required: true },
+  availability: { type: Boolean, required: true }, // This line seems to be causing the error
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] },
+    coordinates: { type: [Number], default: [0, 0] }
   },
 });
 
-restaurantSchema.pre('save', function (next) {
+driverSchema.pre('save', function (next) {
   // Check if location is empty
   if (!this.location || !this.location.type || !this.location.coordinates) {
     const error = new Error('Location is required.');
@@ -27,9 +26,6 @@ restaurantSchema.pre('save', function (next) {
   }
   next();
 });
-const Restaurant = model<IRestaurant>('Restaurant', restaurantSchema);
 
-
-Restaurant.collection.createIndex({ location: '2dsphere' });
-
-export default Restaurant;
+const driver = model<IDriver>('Driver',driverSchema);
+export default driver ;

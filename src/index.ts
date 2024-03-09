@@ -6,6 +6,7 @@ dotenv.config({path:pathstr});
 import express from "express";
 import userRoutes from './routes/userRoutes';
 import cartRoutes from './routes/cartRoutes';
+import foodRoutes from './routes/foodRoutes';
 import cors from 'cors' 
 
 const app = express()
@@ -14,5 +15,6 @@ app.use(express.json());
 
 app.use('/auth',userRoutes);
 app.use('/cart',cartRoutes);
+app.use('/',foodRoutes)
 
 export default app;

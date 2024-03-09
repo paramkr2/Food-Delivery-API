@@ -100,7 +100,6 @@ export const removeItem = async (req,res) => {
 }
 
 export const updateItem = async (req,res) => {
-
 	try{
 		const {userId} = res.locals;
 		const {dishId,quantity} = req.body 

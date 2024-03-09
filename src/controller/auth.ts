@@ -34,7 +34,7 @@ export const login = async (req,res) => {
 
 export const signup = async (req,res) => {
 	try{
-		const {username,password,email,phone} = req.body;
+		const {username,password,email,phone,location} = req.body;
 		
 		const existingUser = await User.findOne({username});
 		if( existingUser != null ){

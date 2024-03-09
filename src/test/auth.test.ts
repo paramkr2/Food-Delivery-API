@@ -28,7 +28,8 @@ const exampleUser = {
 	  username: 'john_doe',
 	  email: 'john.doe@example.com',
 	  password: 'secure_password',
-	  phone: '123-456-7890'
+	  phone: '123-456-7890',
+	  location:{type:'Point',coordinates:[28.661057,77.211821]}
 	};
 let token = ""
 describe('Test Signup -> login ' ,  () => {
@@ -117,6 +118,15 @@ describe('Test Signup -> login ' ,  () => {
 			expect(res.status).toBe(200)
 	});
 	
+	it('Should fetch nearby resturants' , async() => {
+		let data =  {location: { type: 'Point', coordinates: [28.653605, 77.211281] }}
+		const res = await request(app)
+			.get('/nearbyRestaurants')
+			.set({Authorization:token})
+			.query(data)
+			
+			expect(res.status).toBe(200)
+	})
 	
 		
 });
