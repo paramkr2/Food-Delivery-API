@@ -135,7 +135,6 @@ export const confirmOrder = async (req, res) => {
       const dish = await Dish.findById(dishItem._id);
 
       if (dish) { amount += dish.price * dishItem.quantity; }
-
       return amount;
     }, Promise.resolve(0));
 
@@ -146,8 +145,14 @@ export const confirmOrder = async (req, res) => {
       totalAmount, // Fix the variable name
       delivered: false,
     });
-	
 	await Cart.deleteOne({ userId });
+	
+	/* 
+	Todo: 
+		We also need to assign a delivery driver and send the order details back . 
+	
+	*/
+	
     res.status(200).json(order);
   } catch (err) {
     console.error(err);
