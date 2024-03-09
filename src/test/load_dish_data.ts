@@ -12,6 +12,7 @@ export const generateMockData = async () => {
 	];
     const createdRestaurants = await Restaurant.create(restaurantsData);
 
+
     const dishesData = [
       { name: 'Dish 1', price: 10, restaurantId: createdRestaurants[0]._id },
       { name: 'Dish 2', price: 15, restaurantId: createdRestaurants[0]._id },
