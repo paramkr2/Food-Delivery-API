@@ -5,9 +5,10 @@ import mongoose from 'mongoose';
 
 export const getItem = async (req, res) => {
   try {
+	console.log('fetchitem')
     const { userId } = res.locals;
     const cart = await Cart.findOne({ userId });
-    if (!cart) { return res.status(404).json({ error: 'Cart Not Found' }); }
+    if (!cart) { return res.status(200).json({ msg: 'empty' }); }
     let data = {};
     for (const cartItem of cart.dishes) {
       const dishFull = await Dish.findById(cartItem._id);
@@ -20,7 +21,7 @@ export const getItem = async (req, res) => {
         price: dishFull.price
       };
     }
-    return res.status(200).json({data});
+    return res.status(200).json({...data});
   } catch (err) {
     return res.status(500).json({ error: 'Internal Server Error' , actual:err});
   }
@@ -30,7 +31,7 @@ export const addItem = async (req, res) => {
   try {
     const userId = res.locals.userId;
     const { itemId, quantity, forceAdd } = req.body;
-
+	
     // Check if item exists
     const foodItem = await Dish.findById(itemId);
     if (!foodItem) {
@@ -43,19 +44,20 @@ export const addItem = async (req, res) => {
     // If cart not present yet
 	if (!userCart) {
       userCart = new Cart({ userId, restaurantId: foodItem.restaurantId, dishes: [] });
-    }else if (userCart.restaurantId !== foodItem.restaurantId) {
+    }else if (String(userCart.restaurantId) !== String(foodItem.restaurantId)) {
       // If restaurants are different
 	 //userCart.dishes = [] ;
-	 if( !forceAdd ){
-		return res.status(405).json({message:'Resturant Mismatch'});
-	 }
-	 userCart.dishes.splice(0, userCart.dishes.length);
-     userCart.restaurantId = foodItem.restaurantId;
+		 if( !forceAdd ){
+			console.log(`Restaruant Id Mismatch food_rid:${ foodItem.restaurantId} userCart:${userCart.restaurantId} `)
+			return res.status(405).json({message:'Resturant Mismatch'});
+		 }
+		 userCart.dishes.splice(0, userCart.dishes.length);
+		 userCart.restaurantId = foodItem.restaurantId;
     }
 	
 
     // Check if the item is already in the cart
-    const existingIndex = userCart.dishes.findIndex(dish => dish.id.equals(userId));
+    const existingIndex = userCart.dishes.findIndex(dish => dish._id.equals(foodItem._id));
 
     if (existingIndex !== -1) {
       // Update quantity if the item is already in the cart
@@ -69,6 +71,7 @@ export const addItem = async (req, res) => {
 
     return res.status(201).json({ msg: 'Food item added to cart' });
   } catch (error) {
+	console.log('Add Cart Item error',error)
     return res.status(500).json({ msg: 'Internal Server Error', error });
   }
 };

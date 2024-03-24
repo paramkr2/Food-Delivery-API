@@ -55,8 +55,9 @@ export const nearbyRestaurants = async (req, res) => {
 export const itemsRestaurants = async (req,res) => {
 	try {
 		const { restaurantId } = req.query;
+		console.log('In itemsRestaurants', restaurantId)
 		// Search for dishes based on the provided restaurant ID
-		const dishes = await Dish.find({ restaurant: restaurantId });
+		const dishes = await Dish.find({ restaurantId });
 		res.status(200).json(dishes);
   } catch (err) {
 		console.error(err);

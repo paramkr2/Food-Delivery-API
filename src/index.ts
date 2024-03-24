@@ -16,5 +16,8 @@ app.use(express.json());
 app.use('/auth',userRoutes);
 app.use('/cart',cartRoutes);
 app.use('/',foodRoutes)
-
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
 export default app;

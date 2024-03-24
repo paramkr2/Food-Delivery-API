@@ -33,7 +33,7 @@ const exampleUser = {
 	};
 let token = ""
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
-	let testDish1 ,testDish2 ;
+	let testDish1 ,testDish2 , testDish3;
 	it('should signup new user' , async () => {
 		const res = await request(app)
 			.post('/auth/signup')
@@ -59,9 +59,10 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			expect(res.status).toBe(409);
 	})
 	
-	it('Should add items to cart',async() => {
+	it('Should add 1st item to cart',async() => {
 		const mockData = await generateMockData();
 		testDish1 = { itemId: mockData.dishes[0]._id, quantity: 1, forceAdd: 0 };
+		testDish3 = { itemId: mockData.dishes[1]._id, quantity: 1, forceAdd: 0 };
 		testDish2 = { itemId: mockData.dishes[2]._id, quantity: 1, forceAdd: 0 };
 		const res = await request(app)
 			.post('/cart/add')
@@ -69,6 +70,16 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			.send(testDish1)
 			expect(res.status).toBe(201);
 	});
+	
+	
+	it('Should add end item from same to cart',async() => {
+		const res = await request(app)
+			.post('/cart/add')
+			.set({Authorization:token})
+			.send(testDish3)
+			expect(res.status).toBe(201);
+	});
+	
 	
 	it('Should give error on diffrent resturant if not forceAdd', async () => {
 		const res = await request(app)
@@ -92,10 +103,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			.set({Authorization:token})
 			
 			expect(res.status).toBe(200);
-			expect(res.body.data).toBeDefined();
-			
-			 const numberOfDishes = Object.keys(res.body.data).length;
-			expect(numberOfDishes).toBe(1);
+			expect(Object.keys(res.body).length).toBe(1);
 	});
 	it('Should Update dish quantity',async() => {
 		const res = await request(app)
@@ -118,15 +126,28 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			expect(res.status).toBe(200)
 	});
 	
-	it('Should fetch nearby resturants' , async() => {
-		let data =  {location: { type: 'Point', coordinates: [28.653605, 77.211281] }}
+	let restaurants= []
+	it('Should fetch nearby restaurants', async () => {
+		let data = { location: { type: 'Point', coordinates: [28.653605, 77.211281] } };
 		const res = await request(app)
 			.get('/nearbyRestaurants')
-			.set({Authorization:token})
-			.query(data)
-			
-			expect(res.status).toBe(200)
-	})
+			.set({ Authorization: token })
+			.query(data);
+
+		expect(res.status).toBe(200);
+		restaurants = res.body; // Assuming the response contains an array of restaurants
+	});
+
+	it('Should fetch dishes of a restaurant', async () => {
+		const res = await request(app)
+			.get('/itemsRestaurants')
+			.query({ restaurantId: restaurants[0]._id }); // Assuming restaurants variable is defined outside the test
+
+			expect(res.status).toBe(200);
+			console.log('fetch dishes', res.body)
+			expect(res.body.length).toBeGreaterThan(1);;
+	});
+
 	
 	it('Should confirm order and Delete Cart ' , async() => {
 		const res = await request(app)
@@ -139,7 +160,6 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 		const res = await request(app)
 			.post('/cart/confirmOrder')
 			.set({Authorization:token})
-			
 		expect(res.status).toBe(404)
 	})
 	
