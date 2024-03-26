@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt , {JwtPayload} from 'jsonwebtoken';
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -9,10 +9,14 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const payload = await jwt.verify(token, process.env.secretkey);
+		console.log(payload)
         res.locals.userId = payload.userId;
+		res.locals.restaurantOwner = payload.restaurantOwner;
+
         next();
     } catch (error) {
-        return res.status(400).json({ error: 'Invalid Token' });
+		console.log(error);
+         res.status(400).json({ error: 'Invalid Token' });
     }
 };
 

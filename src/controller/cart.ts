@@ -15,11 +15,7 @@ export const getItem = async (req, res) => {
       if (!dishFull) {
         return res.status(404).json({ error: 'Dish not found' });
       }
-      data[cartItem._id.toString()] = {
-        id: dishFull._id,
-        name: dishFull.name,
-        price: dishFull.price
-      };
+      data[cartItem._id.toString()] =dishFull ;
     }
     return res.status(200).json({...data});
   } catch (err) {
@@ -61,15 +57,15 @@ export const addItem = async (req, res) => {
 
     if (existingIndex !== -1) {
       // Update quantity if the item is already in the cart
-      userCart.dishes[existingIndex].quantity += quantity;
+      userCart.dishes[existingIndex].quantity = quantity;
     } else {
       // Add a new item to the cart
-      userCart.dishes.push({ _id:foodItem._id, quantity });
+      userCart.dishes.push({ _id:foodItem._id, quantity  });
     }
-
     await userCart.save();
-
-    return res.status(201).json({ msg: 'Food item added to cart' });
+	
+	const addedItem = userCart.dishes.find(dish => dish._id.equals(foodItem._id));
+    return res.status(201).json({ msg: 'Food item added to cart', item: addedItem });
   } catch (error) {
 	console.log('Add Cart Item error',error)
     return res.status(500).json({ msg: 'Internal Server Error', error });

@@ -8,6 +8,7 @@ interface IRestaurant extends Document {
     type: string;
     coordinates: [number, number];
   };
+  ownerId: Schema.Types.ObjectId;
 }
 
 const restaurantSchema = new Schema<IRestaurant>({
@@ -17,6 +18,7 @@ const restaurantSchema = new Schema<IRestaurant>({
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], default: [0, 0] },
   },
+  ownerId:{type:Schema.Types.ObjectId,ref:'User',required:true},
 });
 
 restaurantSchema.pre('save', function (next) {

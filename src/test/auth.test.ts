@@ -3,8 +3,10 @@ import app from '../index'
 import dbconnect from '../db/db'
 import mongoose from 'mongoose'
 import {generateMockData} from './load_dish_data';
+import Restaurant from '../models/restaurant';
+import User from '../models/user'
+import jwt from 'jsonwebtoken'
 
-  
 const clearDatabase = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   
@@ -14,6 +16,7 @@ const clearDatabase = async () => {
   }
 };
 
+jest.mock('jsonwebtoken')
 
 beforeAll(async () => {
   await dbconnect();
@@ -32,6 +35,59 @@ const exampleUser = {
 	  location:{type:'Point',coordinates:[28.661057,77.211821]}
 	};
 let token = ""
+
+describe('Admin Routes', () => {
+    let user, restaurant;
+
+    beforeAll(async () => {
+        user = await User.create({username: 'aman', password: 'password', email: 'amn@gmail.com', phone: 123, restaurantOwner: true});
+        restaurant = await Restaurant.create({name: 'taj', phone: 123, ownerId: user._id});
+		const mockPayload = { userId: user._id, restaurantOwner: true };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+
+    });
+	let dishId ;
+    it('should create dish for a userId', async () => {
+        // Mock jwt.verify using jest.spyOn
+        let dish = {name: 'rajma', restaurantId: restaurant._id, price: 10, description: 'Dal'};
+        const res = await request(app)
+            .post('/admin/create')
+            .set({Authorization: '123'})
+            .send(dish);
+		console.log(res.body)
+		dishId = res.body._id ;
+        expect(res.status).toBe(201);
+		expect(res.body).toHaveProperty('name')
+    });
+	
+	it('should update dish for a userId' , async () => {
+		let dish = {dishId , name:'arhar'}
+		const res = await request(app)
+            .post('/admin/update')
+            .set({Authorization: '123'})
+            .send(dish);
+			console.log(res.body);
+			expect(res.status).toBe(200);
+	})
+	
+	it('should fetch the list of restaurants', async () => {
+		const res = await request(app)
+			.get('/admin/list')
+			.set({Authorization:'123'})
+			
+		expect(res.status).toBe(200);
+	})
+	
+	it('shoudl delete item ', async ()=>{
+		const res = await request(app)
+			.delete('/admin/delete')
+			.set({Authorization:'123'})
+			.query({dishId})
+			
+		expect(res.status).toBe(200);
+	})
+});
+/*
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	let testDish1 ,testDish2 , testDish3;
 	it('should signup new user' , async () => {
@@ -165,3 +221,5 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	
 		
 });
+
+*/

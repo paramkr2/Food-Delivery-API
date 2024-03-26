@@ -20,7 +20,7 @@ export const login = async (req,res) => {
 				return res.status(401).json({'error':'Password doesnt match'})
 		}
 		
-		const token = jwt.sign({userId:user._id,username:username},
+		const token = jwt.sign({userId:user._id, username:username, restaurantOwner:user.restaurantOwner },
 			secretkey,
 			{expiresIn:'1h'}
 		);
@@ -34,7 +34,7 @@ export const login = async (req,res) => {
 
 export const signup = async (req,res) => {
 	try{
-		const {username,password,email,phone,location} = req.body;
+		const {username,password,email,phone,location,restaurantOwner} = req.body;
 		
 		const existingUser = await User.findOne({username});
 		if( existingUser != null ){
@@ -42,8 +42,8 @@ export const signup = async (req,res) => {
 			return res.status(409).json({"error":'Username already exists'})
 		}
 		const hashedPassword = await bcrypt.hash(password, 10);
-		const user = await User.create({username,password:hashedPassword,email,phone}) // dont know about address 
-		const token = jwt.sign({userId:user._id,username:username},
+		const user = await User.create({username,password:hashedPassword,email,phone,restaurantOwner}) // dont know about address 
+		const token = jwt.sign({userId:user._id, username:username, restaurantOwner:user.restaurantOwner },
 			secretkey,
 			{expiresIn:'1h'}
 		);
