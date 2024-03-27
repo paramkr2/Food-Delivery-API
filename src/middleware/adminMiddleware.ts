@@ -9,8 +9,8 @@ import Restaurant from '../models/restaurant'
 			return res.status(400).json({error:'Not an owner'})
 		}
 		// fetch the restaurantId related to user 
-		const restaurantId = await Restaurant.findOne({ownerId:userId})
-		res.locals.restaurantId = restaurantId;
+		const restaurant = await Restaurant.findOne({ownerId:userId})
+		res.locals.restaurantId = restaurant._id;
 		next();	
 	}catch(error){
 		return res.status(500).json({error:'Internal Server Error'})

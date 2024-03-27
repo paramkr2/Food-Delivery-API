@@ -17,15 +17,20 @@ export const createItem = async (req, res) => {
   try {
     const { restaurantId } = res.locals;
     const { name, price, description } = req.body;
-    
+	const imagePath = req.file.path; 
+	console.log( 'in createitem',req.body,res.locals ,req.file)
+    if (!req.file) {
+		console.log('filenotfound')
+	 }else{
+		console.log(req.file);
+	 }
     // Ensure that all required fields are provided
     if (!name || !price || !description) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // Create the item
-    const item = await Dish.create({ name, price, description, restaurantId });
-    
+    const item = await Dish.create({ name, price, description, restaurantId, imagePath });
     // Send the created item as response
     res.status(201).json(item);
   } catch (err) {
@@ -45,7 +50,7 @@ export const updateItem = async (req, res) => {
     dish.price = price || dish.price ;
     dish.description = description || dish.description;
     await dish.save();
-    res.status(200).json({ msg: 'Successfully updated' });
+    res.status(200).json(dish);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });

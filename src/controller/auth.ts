@@ -1,4 +1,5 @@
 import User from '../models/user' ;
+import Restaurant from '../models/restaurant'
 import jwt from 'jsonwebtoken' ;
 import bcrypt from 'bcrypt' 
 const secretkey = process.env.secretkey;
@@ -34,7 +35,7 @@ export const login = async (req,res) => {
 
 export const signup = async (req,res) => {
 	try{
-		const {username,password,email,phone,location,restaurantOwner} = req.body;
+		const {username,password,email,phone,location,restaurantOwner,restaurantName} = req.body;
 		
 		const existingUser = await User.findOne({username});
 		if( existingUser != null ){
@@ -43,7 +44,14 @@ export const signup = async (req,res) => {
 		}
 		const hashedPassword = await bcrypt.hash(password, 10);
 		const user = await User.create({username,password:hashedPassword,email,phone,restaurantOwner}) // dont know about address 
-		const token = jwt.sign({userId:user._id, username:username, restaurantOwner:user.restaurantOwner },
+		
+		let jwtPayload = {userId:user._id, username:username, restaurantOwner:user.restaurantOwner,restaurantId:null  }
+		if(restaurantOwner){
+			const restaurant = await Restaurant.create({ownerId:user._id,name:restaurantName,phone,location})
+			jwtPayload = {...jwtPayload,restaurantId:restaurant._id}
+		}
+		
+		const token = jwt.sign(jwtPayload,
 			secretkey,
 			{expiresIn:'1h'}
 		);

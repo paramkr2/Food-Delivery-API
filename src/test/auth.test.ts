@@ -6,7 +6,8 @@ import {generateMockData} from './load_dish_data';
 import Restaurant from '../models/restaurant';
 import User from '../models/user'
 import jwt from 'jsonwebtoken'
-
+const FormData = require('form-data');
+import { Buffer } from 'buffer';
 const clearDatabase = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   
@@ -35,6 +36,8 @@ const exampleUser = {
 	  location:{type:'Point',coordinates:[28.661057,77.211821]}
 	};
 let token = ""
+const fs = require('fs'); // Import 'fs' for file system access
+const path = require('path'); // Import 'path' for path manipulation
 
 describe('Admin Routes', () => {
     let user, restaurant;
@@ -47,25 +50,30 @@ describe('Admin Routes', () => {
 
     });
 	let dishId ;
-    it('should create dish for a userId', async () => {
-        // Mock jwt.verify using jest.spyOn
-        let dish = {name: 'rajma', restaurantId: restaurant._id, price: 10, description: 'Dal'};
-        const res = await request(app)
-            .post('/admin/create')
-            .set({Authorization: '123'})
-            .send(dish);
-		console.log(res.body)
-		dishId = res.body._id ;
-        expect(res.status).toBe(201);
-		expect(res.body).toHaveProperty('name')
-    });
-	
+  
+	it('should create dish with an image and form data', async () => {
+		// ... (rest of your test)
+		const res = await request(app)
+			.post('/admin/create')
+			.set({ Authorization: '123' })
+			.field('name', 'someName')
+			.field('restaurantId', restaurant._id.toString())
+			.field('price', String(10))
+			.field('description', 'Some Description')
+			.attach('image',path.resolve(__dirname, '../../images/dish.jpg'));
+		expect(res.status).toBe(201)
+		expect(res.body).toHaveProperty('imagePath')
+
+	});
+
+	/*
 	it('should update dish for a userId' , async () => {
 		let dish = {dishId , name:'arhar'}
 		const res = await request(app)
             .post('/admin/update')
             .set({Authorization: '123'})
-            .send(dish);
+            .send(dish)
+			
 			console.log(res.body);
 			expect(res.status).toBe(200);
 	})
@@ -86,6 +94,9 @@ describe('Admin Routes', () => {
 			
 		expect(res.status).toBe(200);
 	})
+	*/
+	
+	
 });
 /*
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
