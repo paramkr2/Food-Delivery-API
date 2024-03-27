@@ -5,7 +5,8 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/') // Define the destination directory for storing uploaded files
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname) // Keep the original file name
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname); // Append unique identifier to the original file name
   }
 });
 

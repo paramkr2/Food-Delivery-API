@@ -8,6 +8,9 @@ import User from '../models/user'
 import jwt from 'jsonwebtoken'
 const FormData = require('form-data');
 import { Buffer } from 'buffer';
+import fs from 'fs'
+import path from 'path'
+
 const clearDatabase = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   
@@ -28,16 +31,6 @@ afterAll( async () => {
 	await mongoose.connection.close();
 });
 
-const exampleUser = {
-	  username: 'john_doe',
-	  email: 'john.doe@example.com',
-	  password: 'secure_password',
-	  phone: '123-456-7890',
-	  location:{type:'Point',coordinates:[28.661057,77.211821]}
-	};
-let token = ""
-const fs = require('fs'); // Import 'fs' for file system access
-const path = require('path'); // Import 'path' for path manipulation
 
 describe('Admin Routes', () => {
     let user, restaurant;
@@ -49,10 +42,10 @@ describe('Admin Routes', () => {
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
 
     });
-	let dishId ;
+	let dish ;
   
 	it('should create dish with an image and form data', async () => {
-		// ... (rest of your test)
+		
 		const res = await request(app)
 			.post('/admin/create')
 			.set({ Authorization: '123' })
@@ -61,24 +54,35 @@ describe('Admin Routes', () => {
 			.field('price', String(10))
 			.field('description', 'Some Description')
 			.attach('image',path.resolve(__dirname, '../../images/dish.jpg'));
+		
+		console.log('Created Item',res.body);
 		expect(res.status).toBe(201)
 		expect(res.body).toHaveProperty('imagePath')
-
+		dish = res.body;
 	});
-
-	/*
-	it('should update dish for a userId' , async () => {
-		let dish = {dishId , name:'arhar'}
-		const res = await request(app)
-            .post('/admin/update')
-            .set({Authorization: '123'})
-            .send(dish)
-			
-			console.log(res.body);
-			expect(res.status).toBe(200);
-	})
 	
-	it('should fetch the list of restaurants', async () => {
+	it('should update dish with an image and form data', async () => {
+		
+		const res = await request(app)
+			.post('/admin/update')
+			.set({ Authorization: '123' })
+			.field('dishId',dish._id.toString())
+			.field('name', 'some other name ')
+			.field('restaurantId', restaurant._id.toString())
+			.field('price', String(10))
+			.field('description', 'Some Description')
+			.attach('image',path.resolve(__dirname, '../../images/dish.jpg'));
+			
+		console.log('Item after updating', res.body);
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('imagePath')
+		dish = res.body ;
+	});
+	
+
+	
+	
+	it('should fetch the list of dishes in users restaurant', async () => {
 		const res = await request(app)
 			.get('/admin/list')
 			.set({Authorization:'123'})
@@ -86,21 +90,48 @@ describe('Admin Routes', () => {
 		expect(res.status).toBe(200);
 	})
 	
-	it('shoudl delete item ', async ()=>{
+	it('should delete item and associated image', async () => {
+		// Check if the image file exists before deletion
+		const imagePath = dish.imagePath;
+		const imageExistsBeforeDeletion = fs.existsSync(imagePath);
+		expect(imageExistsBeforeDeletion).toBe(true);
+
+		// Send delete request to delete the item
 		const res = await request(app)
-			.delete('/admin/delete')
-			.set({Authorization:'123'})
-			.query({dishId})
-			
+		  .delete('/admin/delete')
+		  .set({ Authorization: '123' })
+		  .query({ dishId:dish._id });
+
+		// Check if the request was successful
 		expect(res.status).toBe(200);
-	})
-	*/
+
+		// Check if the image file no longer exists after deletion
+		const imageExistsAfterDeletion = fs.existsSync(imagePath);
+		expect(imageExistsAfterDeletion).toBe(false);
+	  });
 	
 	
 });
-/*
+
+
+
+
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
-	let testDish1 ,testDish2 , testDish3;
+	const exampleUser = {
+	  username: 'john_doe',
+	  email: 'john.doe@example.com',
+	  password: 'secure_password',
+	  phone: '1234567890',
+	  location:{type:'Point',coordinates:[28.661057,77.211821]},
+	  restaurantOwner:false
+	};
+
+	let token = ''
+	
+	beforeAll(async () => {
+        jest.spyOn(jwt, 'sign').mockReturnValue('dummytoken');
+    });
+	
 	it('should signup new user' , async () => {
 		const res = await request(app)
 			.post('/auth/signup')
@@ -110,6 +141,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	});
 	
 	it('should login the existin user', async() =>{
+	
 		const res = await request(app)
 			.post('/auth/login')
 			.send(exampleUser)
@@ -118,7 +150,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			expect(res.body).toHaveProperty('token');
 			token = res.body.token ;
 	});
-	it('should return username error', async() =>{
+	it('should return username erro for wrong creditionals ', async() =>{
 		const res = await request(app)
 			.post('/auth/login')
 			.send({username:'rohitsharma',password:'pass'})
@@ -126,43 +158,6 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			expect(res.status).toBe(409);
 	})
 	
-	it('Should add 1st item to cart',async() => {
-		const mockData = await generateMockData();
-		testDish1 = { itemId: mockData.dishes[0]._id, quantity: 1, forceAdd: 0 };
-		testDish3 = { itemId: mockData.dishes[1]._id, quantity: 1, forceAdd: 0 };
-		testDish2 = { itemId: mockData.dishes[2]._id, quantity: 1, forceAdd: 0 };
-		const res = await request(app)
-			.post('/cart/add')
-			.set({Authorization:token})
-			.send(testDish1)
-			expect(res.status).toBe(201);
-	});
-	
-	
-	it('Should add end item from same to cart',async() => {
-		const res = await request(app)
-			.post('/cart/add')
-			.set({Authorization:token})
-			.send(testDish3)
-			expect(res.status).toBe(201);
-	});
-	
-	
-	it('Should give error on diffrent resturant if not forceAdd', async () => {
-		const res = await request(app)
-			.post('/cart/add')
-			.set({Authorization:token})
-			.send(testDish2)
-			expect(res.status).toBe(405);
-	});
-	it('Should add on diffrent resturant if forceAdd', async () => {
-		testDish2.forceAdd = 1 
-		const res = await request(app)
-			.post('/cart/add')
-			.set({Authorization:token})
-			.send(testDish2)
-			expect(res.status).toBe(201);
-	});
 	
 	it('Should Fetch the added dishes', async () => {
 		const res = await request(app)
@@ -172,26 +167,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			expect(res.status).toBe(200);
 			expect(Object.keys(res.body).length).toBe(1);
 	});
-	it('Should Update dish quantity',async() => {
-		const res = await request(app)
-			.put('/cart/update')
-			.set({Authorization:token})
-			.send({
-				dishId:testDish2.itemId,
-				quantity:10
-			})
-			
-			expect(res.status).toBe(200)
-	})
-	it('Should Remove dish from cart' , async() => {
-		const res = await request(app)
-			.delete('/cart/remove')
-			.set({Authorization:token})
-			.query({dishId:testDish2.itemId.toString()})
-			
-			console.log( 'Remove Item', res.body)
-			expect(res.status).toBe(200)
-	});
+	
 	
 	let restaurants= []
 	it('Should fetch nearby restaurants', async () => {
@@ -223,14 +199,6 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 		expect(res.status).toBe(200)
 	})
 	
-	it('Should not confirm when cart empty' , async () => {
-		const res = await request(app)
-			.post('/cart/confirmOrder')
-			.set({Authorization:token})
-		expect(res.status).toBe(404)
-	})
-	
 		
 });
 
-*/

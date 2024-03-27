@@ -1,4 +1,6 @@
 import Dish from '../models/dish'
+import path from 'path'
+import fs from 'fs/promises';
 
 export const itemList = async (req, res) => {
   try {
@@ -17,18 +19,14 @@ export const createItem = async (req, res) => {
   try {
     const { restaurantId } = res.locals;
     const { name, price, description } = req.body;
-	const imagePath = req.file.path; 
+	
 	console.log( 'in createitem',req.body,res.locals ,req.file)
-    if (!req.file) {
-		console.log('filenotfound')
-	 }else{
-		console.log(req.file);
-	 }
+    
     // Ensure that all required fields are provided
-    if (!name || !price || !description) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
+	if (!name || !price || !description || !req.file) {
+		  return res.status(400).json({ error: 'Missing required fields' });
+	}
+	const imagePath = req.file.path; 
     // Create the item
     const item = await Dish.create({ name, price, description, restaurantId, imagePath });
     // Send the created item as response
@@ -39,22 +37,38 @@ export const createItem = async (req, res) => {
   }
 };
 
+
+
 export const updateItem = async (req, res) => {
-  try {
-    const { dishId, name, price, description  } = req.body;
-    const dish = await Dish.findById(dishId);
-    if (!dish) {
-      return res.status(404).json({ error: 'Dish not found' });
-    }
-    dish.name = name || dish.name;
-    dish.price = price || dish.price ;
-    dish.description = description || dish.description;
-    await dish.save();
-    res.status(200).json(dish);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+	/* 
+	Remove the old file if we have a newImage file 
+	*/
+	  try {
+		const { dishId, name, price, description  } = req.body;
+		const dish = await Dish.findById(dishId);
+		if (!dish) {
+		  return res.status(404).json({ error: 'Dish not found' });
+		}
+		dish.name = name || dish.name;
+		dish.price = price || dish.price ;
+		dish.description = description || dish.description;
+		
+		if (req.file) {
+		  // Remove the old image file
+		  if (dish.imagePath) {
+			const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
+			await fs.unlink(oldImagePath);
+		  }
+		  // Update the imagePath with the path of the new image file
+		  dish.imagePath = req.file.path;
+		}
+		
+		await dish.save();
+		res.status(200).json(dish);
+	  } catch (err) {
+		console.error(err);
+		res.status(500).json({ error: 'Internal Server Error' });
+	  }
 };
 
 
@@ -62,7 +76,13 @@ export const deleteItem = async (req, res) => {
   try {
     const { dishId } = req.query;
     // Use findByIdAndDelete to delete the document by its ID
-    await Dish.findByIdAndDelete(dishId);
+    
+	const dish = await Dish.findById(dishId);
+	if (dish.imagePath) {
+		const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
+		await fs.unlink(oldImagePath);
+	  }
+	 await Dish.findByIdAndDelete(dishId);
     res.status(200).json({ msg: 'Item deleted successfully' });
   } catch (err) {
     console.error(err);
