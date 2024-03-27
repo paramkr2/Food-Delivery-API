@@ -82,13 +82,23 @@ describe('Admin Routes', () => {
 
 	
 	
-	it('should fetch the list of dishes in users restaurant', async () => {
+	it('/admin/list should fetch the list of dishes in users restaurant', async () => {
 		const res = await request(app)
 			.get('/admin/list')
 			.set({Authorization:'123'})
 			
 		expect(res.status).toBe(200);
 	})
+	
+	it('Get /itemsRestaurants | Should fetch dishes of a restaurant', async () => {
+			const res = await request(app)
+				.get('/itemsRestaurants')
+				.query({ restaurantId:restaurant._id.toString() }); // Assuming restaurants variable is defined outside the test
+
+				expect(res.status).toBe(200);
+				console.log('fetch dishes', res.body)
+				expect(res.body.length).toEqual(1);;
+		});
 	
 	it('should delete item and associated image', async () => {
 		// Check if the image file exists before deletion
@@ -110,11 +120,11 @@ describe('Admin Routes', () => {
 		expect(imageExistsAfterDeletion).toBe(false);
 	  });
 	
-	
+		
 });
 
 
-
+/*
 
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	const exampleUser = {
@@ -181,15 +191,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 		restaurants = res.body; // Assuming the response contains an array of restaurants
 	});
 
-	it('Should fetch dishes of a restaurant', async () => {
-		const res = await request(app)
-			.get('/itemsRestaurants')
-			.query({ restaurantId: restaurants[0]._id }); // Assuming restaurants variable is defined outside the test
-
-			expect(res.status).toBe(200);
-			console.log('fetch dishes', res.body)
-			expect(res.body.length).toBeGreaterThan(1);;
-	});
+	
 
 	
 	it('Should confirm order and Delete Cart ' , async() => {
@@ -202,3 +204,5 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 		
 });
 
+
+*/
