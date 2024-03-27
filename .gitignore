@@ -2,3 +2,5 @@ node_modules
 var.env
 var.test.env 
 scripts
+uploads
+images

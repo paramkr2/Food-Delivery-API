@@ -38,7 +38,6 @@ export const createItem = async (req, res) => {
 };
 
 
-
 export const updateItem = async (req, res) => {
 	/* 
 	Remove the old file if we have a newImage file 
@@ -53,6 +52,7 @@ export const updateItem = async (req, res) => {
 		dish.price = price || dish.price ;
 		dish.description = description || dish.description;
 		
+		// only update if provided 
 		if (req.file) {
 		  // Remove the old image file
 		  if (dish.imagePath) {
@@ -76,7 +76,6 @@ export const deleteItem = async (req, res) => {
   try {
     const { dishId } = req.query;
     // Use findByIdAndDelete to delete the document by its ID
-    
 	const dish = await Dish.findById(dishId);
 	if (dish.imagePath) {
 		const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
