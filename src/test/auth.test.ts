@@ -71,11 +71,16 @@ describe('Admin Routes', () => {
 			.field('restaurantId', restaurant._id.toString())
 			.field('price', String(10))
 			.field('description', 'Some Description')
-			.attach('image',path.resolve(__dirname, '../../images/dish.jpg'));
+			.attach('image',path.resolve(__dirname, '../../images/burger.jpg'));
 			
 		console.log('Item after updating', res.body);
 		expect(res.status).toBe(200)
-		expect(res.body).toHaveProperty('imagePath')
+		// To confirm image is updloaded we check if the path is diffrent
+		console.log( `Comparing image paths ${res.body.imagePath}  ${dish.imagePath}`)
+		expect( res.body.imagePath != dish.imagePath ).toBe(true)
+		
+		// this still doesnt check if the values are updated 
+		
 		dish = res.body ;
 	});
 	

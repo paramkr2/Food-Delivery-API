@@ -51,7 +51,7 @@ export const updateItem = async (req, res) => {
 		dish.name = name || dish.name;
 		dish.price = price || dish.price ;
 		dish.description = description || dish.description;
-		
+		console.log('admin update req.file is :', req.file)
 		// only update if provided 
 		if (req.file) {
 		  // Remove the old image file
@@ -77,6 +77,8 @@ export const deleteItem = async (req, res) => {
     const { dishId } = req.query;
     // Use findByIdAndDelete to delete the document by its ID
 	const dish = await Dish.findById(dishId);
+	if( !dish ){ return res.status(400).json({msg:'Dish not found'})}
+	console.log('In delete item',dish)
 	if (dish.imagePath) {
 		const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
 		await fs.unlink(oldImagePath);
