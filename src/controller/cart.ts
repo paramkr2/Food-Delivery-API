@@ -1,6 +1,5 @@
 import Cart from '../models/cart';
 import Dish from '../models/dish';
-import Order from '../models/order'
 import mongoose from 'mongoose';
 
 export const getItem = async (req, res) => {
@@ -121,40 +120,3 @@ export const updateItem = async (req,res) => {
 	
 }
 
-export const confirmOrder = async (req, res) => {
-  try {
-    const { userId } = res.locals;
-    const cart = await Cart.findOne({ userId });
-    if (!cart) {
-      return res.status(404).json({ error: 'Cart not found' });
-    }
-    const totalAmount = await cart.dishes.reduce(async (amountPromise, dishItem) => {
-	// because we normally have synchronous callback, 
-      let amount = await amountPromise; 
-      const dish = await Dish.findById(dishItem._id);
-
-      if (dish) { amount += dish.price * dishItem.quantity; }
-      return amount;
-    }, Promise.resolve(0));
-
-    const order = await Order.create({
-      userId,
-      restaurantId: cart.restaurantId,
-      dishes: cart.dishes,
-      totalAmount, // Fix the variable name
-      delivered: false,
-    });
-	await Cart.deleteOne({ userId });
-	
-	/* 
-	Todo: 
-		We also need to assign a delivery driver and send the order details back . 
-	
-	*/
-	
-    res.status(200).json(order);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};

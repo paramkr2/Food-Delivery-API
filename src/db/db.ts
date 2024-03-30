@@ -4,8 +4,7 @@ console.log('db url read ', process.env.DB_URL);
 export default async () =>{
 	try{
 		await mongoose.connect(process.env.DB_URL, {
-		  useNewUrlParser: true,
-		  useUnifiedTopology: true,
+		  useNewUrlParser: true
 		}  as ConnectOptions);
 		console.log('DB Connected');
 	}catch{

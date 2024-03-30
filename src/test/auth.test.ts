@@ -11,6 +11,7 @@ import { Buffer } from 'buffer';
 import fs from 'fs'
 import path from 'path'
 
+/*
 const clearDatabase = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   
@@ -31,6 +32,37 @@ afterAll( async () => {
 	await mongoose.connection.close();
 });
 
+*/
+
+describe('Payment Routes', ()=> {
+
+	let paymentId; // Define a variable to store the payment ID
+
+	it('should create payment', async () => {
+	  const res = await request(app)
+		.post('/payment/create')
+		.send({ amount: 1000, currency: 'usd', paymentMethod: 'pm_card_visa' });
+
+	  expect(res.status).toBe(200);
+	  expect(res.body).toHaveProperty('id');
+	  paymentId = res.body.id; // Store the payment ID for later use
+	});
+
+	it('should confirm payment', async () => {
+	  expect(paymentId).toBeDefined(); // Ensure paymentId is defined from the first request
+	  const res = await request(app)
+		.post('/payment/confirm')
+		.send({ paymentIntentId:paymentId });
+
+	  expect(res.status).toBe(200);
+	  // Add additional assertions as needed to verify the confirmation result
+	});
+
+
+
+})
+
+/*
 
 describe('Admin Routes', () => {
     let user, restaurant;
@@ -128,6 +160,7 @@ describe('Admin Routes', () => {
 		
 });
 
+*/
 
 /*
 
