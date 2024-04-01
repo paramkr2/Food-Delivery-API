@@ -1,6 +1,8 @@
 import Dish from '../models/dish'
+import Order from '../models/order'
 import path from 'path'
 import fs from 'fs/promises';
+import { startOfDay, endOfDay } from 'date-fns';
 
 export const itemList = async (req, res) => {
   try {
@@ -69,6 +71,46 @@ export const updateItem = async (req, res) => {
 		console.error(err);
 		res.status(500).json({ error: 'Internal Server Error' });
 	  }
+};
+
+export const history = async( req,res) => {
+	try{
+		const { restaurantId } = res.locals;
+		const todayStart = startOfDay(new Date());
+		const todayEnd = endOfDay(new Date());
+
+		const orders = await Order.find({
+			restaurantId,
+			createdAt: { $gte: todayStart, $lte: todayEnd }
+		})
+		.sort({ createdAt: -1 });
+
+		res.status(200).send(orders);
+		
+	}catch(err){
+		res.status(500).send({error:'Internal server error'})
+	}
+
+}
+
+export const acceptOrder = async (req, res) => {
+  try {
+    const { restaurantId } = res.locals;
+    const { orderId } = req.params; // Corrected destructuring
+    
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({ error: 'Order not found' }); // Changed to return
+    }
+    
+    order.status = 'Preparing'; // Changed status to 'Accepted'
+    await order.save();
+    
+    res.status(200).send(order); // Corrected response message
+  } catch (error) { // Added error parameter
+    console.error('Error accepting order:', error); // Log the error
+    res.status(500).send({ error: 'Internal server error' }); // Send internal server error response
+  }
 };
 
 
