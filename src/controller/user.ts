@@ -62,4 +62,24 @@ const updateUser = async (req, res) => {
     }
 }
 
-export {addressUpdate,getUser,updateUser};
+
+ const getAddress = async (req, res) => {
+  try {
+    const {userId} = res.locals;
+    const address = await Address.findOne({ userId });
+
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+
+    res.status(200).json(address);
+  } catch (error) {
+    console.error('Error fetching address:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
+export {addressUpdate,getUser,updateUser,getAddress};

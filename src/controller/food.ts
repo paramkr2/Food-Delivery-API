@@ -1,4 +1,5 @@
-import Restaurant from '../models/restaurant'
+import Restaurant from '../models/restaurant';
+import Address from '../models/address';
 import Dish from '../models/dish'
 import axios from 'axios';
 
@@ -64,3 +65,26 @@ export const itemsRestaurants = async (req,res) => {
 		res.status(500).send({ error: 'Internal Server Error' });
   }
 }
+
+export const getAddress = async (req, res) => {
+  try {
+	console.log('getting restaurant')
+	const restaurantId = req.params.restaurantId;
+    const restaurant = await Restaurant.findById(restaurantId);
+
+    if (!restaurant) {
+      return res.status(404).send({ error: 'No restaurant found' });
+    }
+
+    const address = await Address.findOne({ userId: restaurant.ownerId });
+
+    if (!address) {
+      return res.status(404).send({ error: 'Address not found for restaurant' });
+    }
+
+    res.status(200).send(address);
+  } catch (err) {
+    console.error('Error fetching address:', err);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+};

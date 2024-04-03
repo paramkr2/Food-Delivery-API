@@ -2,16 +2,17 @@ import {Schema,model,Document,Types} from 'mongoose'
 
 const addressSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, required: true },
-    city: String,
-    state_district: String,
+    city: {type:String},
+    state_district: {type:String},
     state: { type: String, required: true },
     postcode: { type: String, required: true },
-    neighbourhood: String,
+    neighbourhood: {type:String},
     location: {
         type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], default: [0, 0] }
+        coordinates: { type: [Number], default: [0, 0],required:true }
     }
 });
+
 
 addressSchema.index({ location: '2dsphere' });
 

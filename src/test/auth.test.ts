@@ -116,9 +116,6 @@ describe('Admin Routes', () => {
 		dish = res.body ;
 	});
 	
-
-	
-	
 	it('/admin/list should fetch the list of dishes in users restaurant', async () => {
 		const res = await request(app)
 			.get('/admin/list')
@@ -159,7 +156,6 @@ describe('Admin Routes', () => {
 	
 		
 });
-
 
 
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
@@ -218,3 +214,87 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 });
 
 
+
+describe('Address Routes', ()=> {
+	
+	let user, restaurant,userOwner;
+
+    beforeAll(async () => {
+        user = await User.create({username: 'aman', password: 'password', email: 'amn@gmail.com', phone:12345678, restaurantOwner:true,restaurantName:'Haras' });
+        userOwner = await User.create({username: 'ownerName', password: 'password', email: 'amnn@gmail.com', phone: 12345678, restaurantOwner: true});
+		restaurant = await Restaurant.create({name: 'taj', phone: 123, ownerId: userOwner._id});
+		
+    });
+	
+	it( 'should create Address for user ',async () => {
+		const mockPayload = { userId: user._id, restaurantOwner: false };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+		const data = {
+		  "city": "New York",
+		  "state_district": "Manhattan",
+		  "state": "New York",
+		  "postcode": "10001",
+		  "neighbourhood": "Chelsea",
+		  "location": {
+			"type": "Point",
+			"coordinates": [40.7128, -74.0060]
+		  }
+		}
+		const res = await request(app)
+			.post('/user/address')
+			.set({ Authorization: '123' })
+			.send(data)
+		
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('location')
+	})
+
+	
+	it( 'should create Address for user ',async () => {
+		const mockPayload = { userId: userOwner._id, restaurantOwner: true  };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+		const data = {
+		  "city": "New York",
+		  "state_district": "Manhattan",
+		  "state": "New York",
+		  "postcode": "10001",
+		  "neighbourhood": "Chelsea",
+		  "location": {
+			"type": "Point",
+			"coordinates": [40.7128, -74.0060]
+		  }
+		}
+		const res = await request(app)
+			.post('/user/address')
+			.set({ Authorization: 'mockToken' })
+			.send(data)
+		console.log(res.body)
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('location')
+	})
+	
+	it('should fetch address for user ', async () => {
+		const mockPayload = { userId: String(user._id), restaurantOwner: false  };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+		const res = await request(app)
+			.get('/user/address')
+			.set({Authorization:'mockToken'})
+			
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('location')
+	})
+	
+	it('should fetch address for restaurant', async() => {
+		const mockPayload = { userId: user._id, restaurantOwner: false  };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+		const res = await request(app)
+			.get(`/restaurant/address/${String(restaurant._id)}`)
+			.set({Authorization:'mockToken'})
+		
+		console.log(res.body)
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('location');
+		
+	})
+
+})

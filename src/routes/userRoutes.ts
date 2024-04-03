@@ -1,4 +1,4 @@
-import { addressUpdate, getUser, updateUser } from '../controller/user';
+import { addressUpdate, getUser, updateUser ,getAddress } from '../controller/user';
 import { Router } from 'express';
 import authMiddleware from '../middleware/authMiddleware';
 
@@ -13,4 +13,6 @@ router.get('/get', authMiddleware, getUser);
 // Route to update user other than address
 router.post('/update', authMiddleware, updateUser);
 
+// to fetch address of current user logged in 
+router.get('/address',authMiddleware,getAddress );
 export default router;
