@@ -1,8 +1,16 @@
-import {login,signup} from '../controller/auth' ;
-import {Router} from 'express'
+import { addressUpdate, getUser, updateUser } from '../controller/user';
+import { Router } from 'express';
+import authMiddleware from '../middleware/authMiddleware';
 
-const router = Router()
-router.post('/login',login);
-router.post('/signup',signup);
+const router = Router();
 
-export default router ;
+// Route to update location and address
+router.post('/address', authMiddleware, addressUpdate);
+
+// Route to get user by ID
+router.get('/get', authMiddleware, getUser);
+
+// Route to update user other than address
+router.post('/update', authMiddleware, updateUser);
+
+export default router;

@@ -27,7 +27,8 @@ export const login = async (req,res) => {
 		);
 		
 		return res.status(200).json({'token':token,msg:'Login Successfull'})
-	}catch{
+	}catch(err){
+		console.log('Login erroro ')
 		return res.status(500).json({'error':'Internal server error'});
 	}
 };

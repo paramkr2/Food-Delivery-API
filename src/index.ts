@@ -4,8 +4,9 @@ dotenv.config({path:pathstr});
 
 import express from "express";
 import userRoutes from './routes/userRoutes';
+import authRoutes from './routes/authRoutes'
 import cartRoutes from './routes/cartRoutes';
-import foodRoutes from './routes/foodRoutes';
+import restaurantRoutes from './routes/restaurantRoutes';
 import paymentRoutes from './routes/paymentRoutes'
 import adminRoutes from './routes/adminRoutes'
 import orderRoutes from './routes/orderRoutes'
@@ -20,12 +21,13 @@ app.use('/payment/webhook', express.raw({type: "*/*"}) ,handleWebhookEvent );
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use('/auth',userRoutes);
+app.use('/restaurant',restaurantRoutes)
 app.use('/cart',cartRoutes);
 app.use('/payment',paymentRoutes);
 app.use('/admin',adminRoutes);
 app.use('/order',orderRoutes);
-app.use('/',foodRoutes)
+app.use('/user',userRoutes)
+app.use('/auth',authRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

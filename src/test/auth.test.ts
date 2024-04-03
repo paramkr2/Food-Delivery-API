@@ -11,7 +11,7 @@ import { Buffer } from 'buffer';
 import fs from 'fs'
 import path from 'path'
 
-/*
+
 const clearDatabase = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   
@@ -32,7 +32,7 @@ afterAll( async () => {
 	await mongoose.connection.close();
 });
 
-*/
+
 
 describe('Payment Routes', ()=> {
 
@@ -62,7 +62,7 @@ describe('Payment Routes', ()=> {
 
 })
 
-/*
+
 
 describe('Admin Routes', () => {
     let user, restaurant;
@@ -129,7 +129,7 @@ describe('Admin Routes', () => {
 	
 	it('Get /itemsRestaurants | Should fetch dishes of a restaurant', async () => {
 			const res = await request(app)
-				.get('/itemsRestaurants')
+				.get('/restaurant/items')
 				.query({ restaurantId:restaurant._id.toString() }); // Assuming restaurants variable is defined outside the test
 
 				expect(res.status).toBe(200);
@@ -160,9 +160,7 @@ describe('Admin Routes', () => {
 		
 });
 
-*/
 
-/*
 
 describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	const exampleUser = {
@@ -205,42 +203,18 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			
 			expect(res.status).toBe(409);
 	})
-	
-	
-	it('Should Fetch the added dishes', async () => {
-		const res = await request(app)
-			.get('/cart/fetch')
-			.set({Authorization:token})
-			
-			expect(res.status).toBe(200);
-			expect(Object.keys(res.body).length).toBe(1);
-	});
-	
-	
 	let restaurants= []
 	it('Should fetch nearby restaurants', async () => {
 		let data = { location: { type: 'Point', coordinates: [28.653605, 77.211281] } };
 		const res = await request(app)
-			.get('/nearbyRestaurants')
+			.get('/restaurant/nearby')
 			.set({ Authorization: token })
 			.query(data);
 
 		expect(res.status).toBe(200);
 		restaurants = res.body; // Assuming the response contains an array of restaurants
 	});
-
-	
-
-	
-	it('Should confirm order and Delete Cart ' , async() => {
-		const res = await request(app)
-			.post('/cart/confirmOrder')
-			.set({Authorization:token})
-		expect(res.status).toBe(200)
-	})
-	
 		
 });
 
 
-*/

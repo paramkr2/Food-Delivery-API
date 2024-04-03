@@ -5,10 +5,6 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phone: { type: String, required: true },
-  location: {
-    type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] },
-  },
   restaurantOwner:{type:Boolean ,required:true,default:false}
 });
 

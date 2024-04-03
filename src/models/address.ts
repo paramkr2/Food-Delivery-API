@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
+import {Schema,model,Document,Types} from 'mongoose'
 
-const addressSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+const addressSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, required: true },
     city: String,
     state_district: String,
     state: { type: String, required: true },
-    country: { type: String, required: true },
     postcode: { type: String, required: true },
     neighbourhood: String,
     location: {
@@ -16,6 +15,6 @@ const addressSchema = new mongoose.Schema({
 
 addressSchema.index({ location: '2dsphere' });
 
-const Address = mongoose.model('Address', addressSchema);
+const Address = model('Address', addressSchema);
 
-module.exports = Address;
+export default Address;
