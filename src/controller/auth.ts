@@ -36,7 +36,7 @@ export const login = async (req,res) => {
 
 export const signup = async (req,res) => {
 	try{
-		const {username,password,email,phone,location,restaurantOwner,restaurantName} = req.body;
+		const {username,password,email,phone,restaurantOwner,restaurantName} = req.body;
 		
 		const existingUser = await User.findOne({username});
 		if( existingUser != null ){
@@ -48,7 +48,7 @@ export const signup = async (req,res) => {
 		
 		let jwtPayload = {userId:user._id, username:username, restaurantOwner:user.restaurantOwner,restaurantId:null  }
 		if(restaurantOwner){
-			const restaurant = await Restaurant.create({ownerId:user._id,name:restaurantName,phone,location})
+			const restaurant = await Restaurant.create({ownerId:user._id,name:restaurantName,phone})
 			jwtPayload = {...jwtPayload,restaurantId:restaurant._id}
 		}
 		

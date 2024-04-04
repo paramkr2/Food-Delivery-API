@@ -1,4 +1,5 @@
 import Restaurant from '../models/restaurant';
+import RestaurantAddress from '../models/restaurantAddress';
 import Address from '../models/address';
 import Dish from '../models/dish'
 import axios from 'axios';
@@ -20,7 +21,7 @@ export const nearbyRestaurants = async (req, res) => {
     };
 
     // Getting a list of nearby restaurants
-    const restaurants = await Restaurant.find(query);
+    const restaurants = await RestaurantAddress.find(query);
 
     // Get travel time for each restaurant
     const restaurantPromises = restaurants.map(async (restaurant) => {
@@ -31,9 +32,11 @@ export const nearbyRestaurants = async (req, res) => {
         const response = await axios.get(
           `https://router.project-osrm.org/route/v1/driving/${userLocation[1]},${userLocation[0]};${coordinates[1]},${coordinates[0]}`
         );
-
+		
+		// fetch restarant 
+		const restInfo = await Restaurant.findById(restaurant.restaurantId );
         return {
-          ...restaurant.toJSON(),
+          ...restInfo.toJSON(),
           travelTime: response.data.routes[0].duration, // Assuming you're interested in travel time
         };
       } catch (error) {
@@ -70,21 +73,53 @@ export const getAddress = async (req, res) => {
   try {
 	console.log('getting restaurant')
 	const restaurantId = req.params.restaurantId;
-    const restaurant = await Restaurant.findById(restaurantId);
-
-    if (!restaurant) {
-      return res.status(404).send({ error: 'No restaurant found' });
-    }
-
-    const address = await Address.findOne({ userId: restaurant.ownerId });
-
+    const address = await RestaurantAddress.findOne({restaurantId}); // its not its id shit
+	
     if (!address) {
-      return res.status(404).send({ error: 'Address not found for restaurant' });
+      return res.status(404).send({ error: 'Address or Restaurant not found ' });
     }
-
+	
     res.status(200).send(address);
   } catch (err) {
     console.error('Error fetching address:', err);
     res.status(500).send({ error: 'Internal server error' });
   }
+};
+
+export const addressUpdate = async (req, res) => {
+    try {
+        const { restaurantId } = res.locals; 
+		console.log( 'addressupdate restaurant', restaurantId )
+        const { city, state_district, state, postcode, neighbourhood, location } = req.body;
+        let address = await RestaurantAddress.findOne({ restaurantId });
+
+        if (!address) {
+            // If address doesn't exist, create a new one
+            address = await RestaurantAddress.create({
+                restaurantId,
+                city,
+                state_district,
+                state,
+                postcode,
+                neighbourhood,
+                location
+            });
+        } else {
+            // If address exists, update it
+            address.set({
+                city,
+                state_district,
+                state,
+                postcode,
+                neighbourhood,
+                location
+            }); // Update only the specified fields
+            await address.save();
+        }
+
+        return res.status(200).send(address);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send({ msg: 'Internal Server Error' });
+    }
 };

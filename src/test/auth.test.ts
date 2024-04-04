@@ -220,10 +220,9 @@ describe('Address Routes', ()=> {
 	let user, restaurant,userOwner;
 
     beforeAll(async () => {
-        user = await User.create({username: 'aman', password: 'password', email: 'amn@gmail.com', phone:12345678, restaurantOwner:true,restaurantName:'Haras' });
+        user = await User.create({username: 'aman1', password: 'password', email: 'amaaan@gmail.com', phone:12345678, restaurantOwner:true,restaurantName:'Haras' });
         userOwner = await User.create({username: 'ownerName', password: 'password', email: 'amnn@gmail.com', phone: 12345678, restaurantOwner: true});
 		restaurant = await Restaurant.create({name: 'taj', phone: 123, ownerId: userOwner._id});
-		
     });
 	
 	it( 'should create Address for user ',async () => {
@@ -250,7 +249,8 @@ describe('Address Routes', ()=> {
 	})
 
 	
-	it( 'should create Address for user ',async () => {
+	it( 'should create Address for restaurant ',async () => {
+		console.log('started creating restaurant')
 		const mockPayload = { userId: userOwner._id, restaurantOwner: true  };
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
 		const data = {
@@ -265,10 +265,10 @@ describe('Address Routes', ()=> {
 		  }
 		}
 		const res = await request(app)
-			.post('/user/address')
+			.post('/restaurant/address')
 			.set({ Authorization: 'mockToken' })
 			.send(data)
-		console.log(res.body)
+		console.log('updated restaurant address in test', res.body)
 		expect(res.status).toBe(200)
 		expect(res.body).toHaveProperty('location')
 	})
@@ -285,6 +285,7 @@ describe('Address Routes', ()=> {
 	})
 	
 	it('should fetch address for restaurant', async() => {
+		// any user should be able to fetch address 
 		const mockPayload = { userId: user._id, restaurantOwner: false  };
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
 		const res = await request(app)

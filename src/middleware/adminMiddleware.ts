@@ -5,6 +5,7 @@ import Restaurant from '../models/restaurant'
  const adminMiddleware = async (req,res,next) => {
 	try{
 		const {restaurantOwner ,userId } = res.locals;
+		console.log('admin middleware',res.locals)
 		if(restaurantOwner == false ){
 			return res.status(400).json({error:'Not an owner'})
 		}

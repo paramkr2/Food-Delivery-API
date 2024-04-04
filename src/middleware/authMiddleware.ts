@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const payload = await jwt.verify(token, process.env.secretkey);
-		console.log(payload)
+		console.log('authmiddlware',payload)
         res.locals.userId = payload.userId;
 		res.locals.restaurantOwner = payload.restaurantOwner;
 

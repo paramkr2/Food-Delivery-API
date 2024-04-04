@@ -11,7 +11,7 @@ interface IDriver extends Document {
 
 const driverSchema = new Schema<IDriver>({
   name: { type: String, required: true },
-  availability: { type: Boolean, required: true }, // This line seems to be causing the error
+  availability: { type: Boolean, required: true }, 
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], default: [0, 0] }
