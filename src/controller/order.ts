@@ -4,12 +4,10 @@ export const create = async (req, res) => {
   try {
     const { userId } = res.locals;
     const { paymentIntentId, total, cart } = req.body;
-    
+    console.log( 'order recieved body', req.body)
     /* todo calculate and verify total amount 
        2. Check if restaurantId exists?
     */
-
-    
     // Format items
 	const formattedItems = Object.keys(cart.items).map( (index) => (
 	{ dishId : cart.items[index]._id, quantity:cart.items[index].quantity}
@@ -24,7 +22,7 @@ export const create = async (req, res) => {
       paymentIntentId
     });
 
-    res.status(201).json({ msg: 'success' });
+    res.status(201).json(order);
   } catch (error) {
     console.log('Order confirmation error', error);
     return res.status(500).send({ error: 'Internal Server Error' });
@@ -88,3 +86,5 @@ export const getOrderById = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+

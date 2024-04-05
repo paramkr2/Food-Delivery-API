@@ -7,15 +7,15 @@ import axios from 'axios';
 export const nearbyRestaurants = async (req, res) => {
   try {
     const { location } = req.query;
-
+	console.log('/nearby location:',location)
     const query = {
       location: {
         $nearSphere: {
           $geometry: {
             type: 'Point',
-            coordinates: location.coordinates || [0, 0],
+            coordinates: location.coordinates ,
           },
-          $maxDistance: 10000, // Set your maximum distance for nearby locations
+          $maxDistance: 1000000, // Set your maximum distance for nearby locations
         },
       },
     };
@@ -71,8 +71,7 @@ export const itemsRestaurants = async (req,res) => {
 
 export const getAddress = async (req, res) => {
   try {
-	console.log('getting restaurant')
-	const restaurantId = req.params.restaurantId;
+	const restaurantId = req.params.restaurantId || res.locals.restaurantId;
     const address = await RestaurantAddress.findOne({restaurantId}); // its not its id shit
 	
     if (!address) {
@@ -123,3 +122,4 @@ export const addressUpdate = async (req, res) => {
         return res.status(500).send({ msg: 'Internal Server Error' });
     }
 };
+

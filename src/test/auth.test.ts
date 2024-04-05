@@ -3,8 +3,13 @@ import app from '../index'
 import dbconnect from '../db/db'
 import mongoose from 'mongoose'
 import {generateMockData} from './load_dish_data';
+
 import Restaurant from '../models/restaurant';
 import User from '../models/user'
+import RestaurantAddress from '../models/restaurantAddress';
+import UserAddress from '../models/userAddress'
+import Driver from '../models/driver'
+
 import jwt from 'jsonwebtoken'
 const FormData = require('form-data');
 import { Buffer } from 'buffer';
@@ -32,6 +37,127 @@ afterAll( async () => {
 	await mongoose.connection.close();
 });
 
+
+
+describe.only('Order create/accept/assign driver /',   ()=> {
+	let user, restaurant,userOwner,order,restaurantAddress,userAddress;
+	beforeAll(async () => {
+		// Create a user who owns a restaurant
+		user = await User.create({
+			username: 'aman2',
+			password: 'password',
+			email: 'amaa2an@gmail.com',
+			phone: 12345678,
+			restaurantOwner: true,
+			restaurantName: 'Haras'
+		});
+
+		// Create another user who owns a restaurant
+		userOwner = await User.create({
+			username: 'ownerName2',
+			password: 'password',
+			email: 'amnn@gmail.com',
+			phone: 12345678,
+			restaurantOwner: true
+		});
+
+		// Create a restaurant owned by the second user
+		restaurant = await Restaurant.create({
+			name: 'taj2',
+			phone: 123,
+			ownerId: userOwner._id
+		});
+
+		// Create a restaurant address
+		restaurantAddress = await RestaurantAddress.create({
+			restaurantId: restaurant._id, // Assuming this is the ObjectId of the restaurant
+			city: 'New Delhi',
+			state_district: 'Central Delhi',
+			state: 'Delhi',
+			postcode: '110001',
+			neighbourhood: 'Connaught Place',
+			location: {
+				type: 'Point',
+				coordinates: [28.6328, 77.2197] // Coordinates for a location near Rajiv Chowk
+			}
+		});
+
+		// Create a user address
+		userAddress = await UserAddress.create({
+			userId: user._id,
+			city: 'New Delhi',
+			state_district: 'Central Delhi',
+			state: 'Delhi',
+			postcode: '110001',
+			neighbourhood: 'Connaught Place',
+			location: {
+				type: 'Point',
+				coordinates: [28.6328, 77.2197]
+			}
+		});
+		
+		const driverNearRestaurant = await Driver.create({
+			name: 'Driver Near Restaurant',
+			availability: true,
+			location: {
+				type: 'Point',
+				coordinates: [28.6328, 77.2197] // Same coordinates as the restaurant address
+			}
+		});
+
+		// Create a driver near the user address location
+		const driverNearUser = await Driver.create({
+			name: 'Driver Near User',
+			availability: true,
+			location: {
+				type: 'Point',
+				coordinates: [28.6328, 77.2197] // Same coordinates as the user address
+			}
+		});
+		
+	});
+
+	
+	it( 'should create order ', async () => {
+		const mockPayload = { userId: user._id, restaurantOwner: false };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+	
+		const data = { paymentIntentId:'paymentId',total:30,cart:{ restaurantId:restaurant._id, items:{} } }
+		const res = await request(app)
+			.post('/order/create')
+			.set({ Authorization: '123' })
+			.send(data)
+		expect(res.status).toBe(201);
+		order = res.body;
+	})
+	
+	it( 'should be accepted and assign driver  ', async () => {
+		const mockPayload = { userId: userOwner._id, restaurantOwner: true };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+	
+		const res = await request(app)
+			.put(`/admin/orders/${order._id}/accept`)
+			.set({Authorization:'123'})
+		
+		console.log(res.body);
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('driverId');
+		expect(res.body.driverId).toBeDefined();
+		expect(mongoose.Types.ObjectId.isValid(res.body.driverId)).toBe(true);
+	})
+	it('Should fetch nearby restaurants', async () => {
+		let data = { location: { type: 'Point', coordinates: [28.653605, 77.211281] } };
+		const res = await request(app)
+			.get('/restaurant/nearby')
+			.query(data);
+		
+		console.log(res.body) ;;
+		expect(res.status).toBe(200);
+		expect(res.body.length).toBe(1);
+	});
+	
+	
+})
 
 
 describe('Payment Routes', ()=> {
@@ -199,17 +325,7 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 			
 			expect(res.status).toBe(409);
 	})
-	let restaurants= []
-	it('Should fetch nearby restaurants', async () => {
-		let data = { location: { type: 'Point', coordinates: [28.653605, 77.211281] } };
-		const res = await request(app)
-			.get('/restaurant/nearby')
-			.set({ Authorization: token })
-			.query(data);
-
-		expect(res.status).toBe(200);
-		restaurants = res.body; // Assuming the response contains an array of restaurants
-	});
+	
 		
 });
 

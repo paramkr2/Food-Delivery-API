@@ -27,5 +27,8 @@ driverSchema.pre('save', function (next) {
   next();
 });
 
+driverSchema.index({ location: '2dsphere' });
+
+
 const driver = model<IDriver>('Driver',driverSchema);
 export default driver ;

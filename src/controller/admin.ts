@@ -1,7 +1,7 @@
 import Dish from '../models/dish'
 import Order from '../models/order'
 import Driver from '../models/driver'
-
+import RestaurantAddress from '../models/restaurantAddress'
 import path from 'path'
 import fs from 'fs/promises';
 import { startOfDay, endOfDay } from 'date-fns';
@@ -17,7 +17,6 @@ export const itemList = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 export const createItem = async (req, res) => {
   try {
@@ -40,7 +39,6 @@ export const createItem = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 export const updateItem = async (req, res) => {
 	/* 
@@ -95,27 +93,7 @@ export const history = async( req,res) => {
 
 }
 
-export const acceptOrder = async (req, res) => {
-  try {
-    const { restaurantId } = res.locals;
-    const { orderId } = req.params; // Corrected destructuring
-    
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(400).json({ error: 'Order not found' }); // Changed to return
-    }
-    
-    order.status = 'Preparing'; // Changed status to 'Accepted'
-    await order.save();
-	// we dont need to await.. but just doing for .. testing right now 
-    await assignDriverToOrder(order); 
-    
-	res.status(200).send(order); // Corrected response message
-  } catch (error) { // Added error parameter
-    console.error('Error accepting order:', error); // Log the error
-    res.status(500).send({ error: 'Internal server error' }); // Send internal server error response
-  }
-};
+
 export const deleteItem = async (req, res) => {
   try {
     const { dishId } = req.query;
@@ -135,23 +113,53 @@ export const deleteItem = async (req, res) => {
   }
 };
 
-
+export const acceptOrder = async (req, res) => {
+	/* todo , not accept until payment is made  */
+	
+ try {
+    const { restaurantId } = res.locals;
+    const { orderId } = req.params; // Corrected destructuring
+    
+    let order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({ error: 'Order not found' }); // Changed to return
+    }
+    
+  // Changed status to 'Accepted'
+    
+	// we dont need to await.. but just doing for .. testing right now 
+    const assignedOrder = await assignDriverToOrder(order); 
+     assignedOrder.status = 'Preparing';
+	await assignedOrder.save();
+	
+	res.status(200).send(assignedOrder); // Corrected response message
+  } catch (error) { // Added error parameter
+    console.error('Error accepting order:', error); // Log the error
+    res.status(500).send({ error: 'Internal server error' }); // Send internal server error response
+  }
+};
 // Function to assign a driver to the order
 const assignDriverToOrder = async (order) => {
   try {
-    // Implement your driver assignment logic here
-    // For example, find an available driver near the restaurant location
-    const driver = await Driver.findOne({ availability: true }).near('location', order.restaurantLocation.coordinates).exec();
-    
-    // Update the order with the assigned driver
-    if (driver) {
-      order.driverId = driver._id;
+	const restaurantAddress = await RestaurantAddress.findOne({restaurantId:order.restaurantId})
+	console.log('location restaurant ', restaurantAddress.location.coordinates)
+    const updateResult = await Driver.findOneAndUpdate(
+      { availability: true, location: { $nearSphere: restaurantAddress.location.coordinates } },
+      { $set: { availability: false } },
+      { new: true } // Return the updated driver document
+    );
+	
+	console.log( 'In assignDriver',updateResult );
+    if (updateResult) {
+      order.driverId = updateResult._id;
       await order.save();
-      console.log(`Driver ${driver.name} assigned to order ${order._id}`);
-    } else {
+      console.log(`Driver ${updateResult.name} assigned to order ${order._id}`);
+		return order ;
+	} else {
       console.log(`No available drivers found near the restaurant for order ${order._id}`);
     }
   } catch (error) {
     console.error('Error assigning driver to order:', error);
   }
 };
+

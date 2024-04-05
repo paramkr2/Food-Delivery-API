@@ -16,5 +16,5 @@ router.post('/address',authMiddleware,adminMiddleware,addressUpdate)
 
 // address of restaurant given by restaurant id , only for signed user
 router.get('/address/:restaurantId',authMiddleware,getAddress)
-
+router.get('/address',authMiddleware,adminMiddleware,getAddress)
 export default router; 
