@@ -10,6 +10,8 @@ import restaurantRoutes from './routes/restaurantRoutes';
 import paymentRoutes from './routes/paymentRoutes'
 import adminRoutes from './routes/adminRoutes'
 import orderRoutes from './routes/orderRoutes'
+import driverRoutes from './routes/driverRoutes'
+
 import cors from 'cors' 
 import path from 'path'
 const app = express()
@@ -28,7 +30,7 @@ app.use('/admin',adminRoutes);
 app.use('/order',orderRoutes);
 app.use('/user',userRoutes)
 app.use('/auth',authRoutes);
-
+app.use('/driver',driverRoutes)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');

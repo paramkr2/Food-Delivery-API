@@ -40,7 +40,7 @@ afterAll( async () => {
 
 
 describe.only('Order create/accept/assign driver /',   ()=> {
-	let user, restaurant,userOwner,order,restaurantAddress,userAddress;
+	let user, restaurant,userOwner,order,restaurantAddress,userAddress, driverNearUser ;
 	beforeAll(async () => {
 		// Create a user who owns a restaurant
 		user = await User.create({
@@ -106,7 +106,7 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 		});
 
 		// Create a driver near the user address location
-		const driverNearUser = await Driver.create({
+		driverNearUser = await Driver.create({
 			name: 'Driver Near User',
 			availability: true,
 			location: {
@@ -117,7 +117,6 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 		
 	});
 
-	
 	it( 'should create order ', async () => {
 		const mockPayload = { userId: user._id, restaurantOwner: false };
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
@@ -156,6 +155,18 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 		expect(res.body.length).toBe(1);
 	});
 	
+	it('should get driver location', async () => {
+		const mockPayload = { userId: user._id, restaurantOwner: false };
+        jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
+	
+		const res = await request(app)
+			.get(`/driver/location/${driverNearUser._id}`)
+			.set({Authorization:'123'})
+			
+			console.log(res.body)
+			expect(res.status).toBe(200);
+			expect(res.body).toHaveProperty('coordinates')
+	})
 	
 })
 
