@@ -3,10 +3,25 @@ import RestaurantAddress from '../models/restaurantAddress';
 import Address from '../models/address';
 import Dish from '../models/dish'
 import axios from 'axios';
+import createError from 'http-errors';
+
+const validateLocation = (location) => {
+  if (!location || !location.lat || !location.lng) {
+    throw createError(400, 'Invalid location data');
+  }
+
+  const lat = parseFloat(location.lat);
+  const lng = parseFloat(location.lng);
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    throw createError(400, 'Invalid latitude or longitude values');
+  }
+  return { lat, lng };
+};
 
 export const nearbyRestaurants = async (req, res) => {
   try {
-    const { location } = req.query;
+    let { location } = req.query;
+	location = validateLocation(location)
     const query = {
       location: {
         $nearSphere: {
@@ -49,10 +64,14 @@ export const nearbyRestaurants = async (req, res) => {
     console.log('In nearbyRestaurants', restaurantResults);
     return res.status(200).json(restaurantResults);
   } catch (err) {
-    console.error(err);
-    res.status(500).send({ error: 'Internal Server Error' });
+		if (err.status === 400) {
+		  res.status(400).send({ error: err.message });
+		} else {
+		  console.error(err);
+		  res.status(500).send({ error: 'Internal Server Error' });
+		}
   }
-};
+}
 
 
 export const itemsRestaurants = async (req,res) => {

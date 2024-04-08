@@ -157,6 +157,16 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 		expect(res.body.length).toBe(1);
 	});
 	
+	it('Should Through on invalid location while fetching nearby restaurants', async () => {
+		let data = { location:{lat:280.653605, lng:77.211281} };
+		const res = await request(app)
+			.get('/restaurant/nearby')
+			.query(data);
+		
+		expect(res.status).toBe(400);
+		expect(res.body.error).toBeDefined();
+	});
+	
 	it('should get driver location', async () => {
 		const mockPayload = { userId: user._id, restaurantOwner: false };
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
