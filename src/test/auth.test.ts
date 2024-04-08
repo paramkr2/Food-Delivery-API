@@ -145,8 +145,9 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 		expect(res.body.driverId).toBeDefined();
 		expect(mongoose.Types.ObjectId.isValid(res.body.driverId)).toBe(true);
 	})
+	
 	it('Should fetch nearby restaurants', async () => {
-		let data = { location: { type: 'Point', coordinates: [28.653605, 77.211281] } };
+		let data = { location:{lat:28.653605, lng:77.211281} };
 		const res = await request(app)
 			.get('/restaurant/nearby')
 			.query(data);

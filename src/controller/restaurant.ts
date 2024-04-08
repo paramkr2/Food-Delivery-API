@@ -7,15 +7,14 @@ import axios from 'axios';
 export const nearbyRestaurants = async (req, res) => {
   try {
     const { location } = req.query;
-	console.log('/nearby location:',location)
     const query = {
       location: {
         $nearSphere: {
           $geometry: {
             type: 'Point',
-            coordinates: location.coordinates ,
+            coordinates: [location.lat,location.lng],
           },
-          $maxDistance: 1000000, // Set your maximum distance for nearby locations
+          $maxDistance: 100000, // Set your maximum distance for nearby locations
         },
       },
     };
@@ -25,10 +24,10 @@ export const nearbyRestaurants = async (req, res) => {
 
     // Get travel time for each restaurant
     const restaurantPromises = restaurants.map(async (restaurant) => {
-      const { coordinates } = restaurant.location;
-      const userLocation = location.coordinates;
+    const { coordinates } = restaurant.location;
+    const userLocation = [location.lat,location.lng];
 
-      try {
+    try {
         const response = await axios.get(
           `https://router.project-osrm.org/route/v1/driving/${userLocation[1]},${userLocation[0]};${coordinates[1]},${coordinates[0]}`
         );
