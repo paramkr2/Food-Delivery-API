@@ -6,6 +6,7 @@ interface IRestaurant extends Document {
   phone: number;
   description:string;
   ownerId: Schema.Types.ObjectId;
+  imagePath:string;
 }
 
 const restaurantSchema = new Schema<IRestaurant>({
@@ -13,6 +14,7 @@ const restaurantSchema = new Schema<IRestaurant>({
   phone: { type: Number, required: true },
   description:{type:String},
   ownerId:{type:Schema.Types.ObjectId,ref:'User',required:true},
+  imagePath:{type:String}
 });
 
 

@@ -2,6 +2,7 @@ import Dish from '../models/dish'
 import Order from '../models/order'
 import Driver from '../models/driver'
 import RestaurantAddress from '../models/restaurantAddress'
+import Restaurant from '../models/restaurant'
 import path from 'path'
 import fs from 'fs/promises';
 import { startOfDay, endOfDay } from 'date-fns';
@@ -163,3 +164,46 @@ const assignDriverToOrder = async (order) => {
   }
 };
 
+export const updateRestaurantInformation = async ( req,res ) => {
+	try{
+		console.log('In Edit RestaurantInformation')
+		const {name,description,phone} = req.body;
+		const {restaurantId} = res.locals;
+		
+		const restaurant = await Restaurant.findById(restaurantId);
+		restaurant.name = name || restaurant.name;
+		restaurant.description = description || restaurant.description;
+		restaurant.phone = phone || restaurant.phone;
+		
+		if (req.file) {
+		  // Remove the old image file
+		  if (restaurant.imagePath) {
+			const oldImagePath = path.join(__dirname, '../../', restaurant.imagePath); // Construct absolute path
+			await fs.unlink(oldImagePath);
+		  }
+		  // Update the imagePath with the path of the new image file
+		  restaurant.imagePath = req.file.path;
+		}
+		
+		await restaurant.save();
+		
+		return res.status(200).send(restaurant)
+		
+	}catch(err){
+		console.log('Error updating restaurant Infromation', err)
+		res.status(500).send({msg:'Internal Server Error'})
+	}
+}
+
+export const getRestaurantInformation = async( req,res) => {
+
+	try{
+		const {restaurantId} = res.locals;
+		
+		const restaurant = await Restaurant.findById(restaurantId);
+		res.status(200).send(restaurant)
+	}catch(err){
+		console.log('Get Restaurant Information', err);
+		res.status(500).send({msg:'Internal server error'})
+	}
+}

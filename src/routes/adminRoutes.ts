@@ -3,7 +3,7 @@ import Router  from 'express';
 
 import authMiddleware from "../middleware/authMiddleware";
 import adminMiddleware from '../middleware/adminMiddleware'
-import {itemList,updateItem,deleteItem,createItem,history,acceptOrder} from '../controller/admin'
+import {itemList,updateItem,deleteItem,createItem,history,acceptOrder,updateRestaurantInformation,getRestaurantInformation} from '../controller/admin'
 import upload from '../middleware/imageuploadMiddleware'
 
 const router = Router();
@@ -15,4 +15,6 @@ router.post('/create', authMiddleware, adminMiddleware ,upload.single('image'), 
 router.get('/orders/today',authMiddleware,adminMiddleware,history );
 router.put('/orders/:orderId/accept',authMiddleware,adminMiddleware,acceptOrder )
 
+router.post('/updateRestaurantInformation',authMiddleware,adminMiddleware,upload.single('image'),updateRestaurantInformation )
+router.get('/getRestaurantInformation',authMiddleware,adminMiddleware,getRestaurantInformation)
 export default router; 

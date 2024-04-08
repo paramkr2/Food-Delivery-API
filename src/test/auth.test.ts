@@ -42,6 +42,7 @@ afterAll( async () => {
 describe.only('Order create/accept/assign driver /',   ()=> {
 	let user, restaurant,userOwner,order,restaurantAddress,userAddress, driverNearUser ;
 	beforeAll(async () => {
+		await clearDatabase();
 		// Create a user who owns a restaurant
 		user = await User.create({
 			username: 'aman2',
@@ -171,7 +172,7 @@ describe.only('Order create/accept/assign driver /',   ()=> {
 })
 
 
-describe('Payment Routes', ()=> {
+describe.only('Payment Routes', ()=> {
 
 	let paymentId; // Define a variable to store the payment ID
 
@@ -201,18 +202,44 @@ describe('Payment Routes', ()=> {
 
 
 
-describe('Admin Routes', () => {
-    let user, restaurant;
+describe.only('Admin Routes', () => {
+    let user, restaurant,dish;
 
     beforeAll(async () => {
+		await clearDatabase();
         user = await User.create({username: 'aman', password: 'password', email: 'amn@gmail.com', phone: 123, restaurantOwner: true});
         restaurant = await Restaurant.create({name: 'taj', phone: 123, ownerId: user._id});
 		const mockPayload = { userId: user._id, restaurantOwner: true };
         jest.spyOn(jwt, 'verify').mockReturnValue(mockPayload);
 
     });
-	let dish ;
   
+	it('should update restaurant infromation', async () => {
+		const res = await request(app)
+			.post('/admin/updateRestaurantInformation')
+			.set({ Authorization: '123' })
+			.field('name', 'someName')
+			.field('description', 'Some Description')
+			.attach('image',path.resolve(__dirname, '../../images/restaurantImage.jpg'));
+		
+		console.log('updatedRestaurant infromation',res.body);
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('imagePath')
+	})
+	
+	it('should fetch restaurant information', async ()=>{
+		const res = await request(app)
+			.get('/admin/getRestaurantInformation')
+			.set({Authorization:'123'})
+		
+		console.log('Fetched Information',res.body)
+		expect(res.status).toBe(200)
+		expect(res.body).toHaveProperty('name')
+		expect(res.body).toHaveProperty('phone')
+		expect(res.body).toHaveProperty('description')
+		expect(res.body).toHaveProperty('imagePath')
+	})
+	
 	it('should create dish with an image and form data', async () => {
 		
 		const res = await request(app)
@@ -291,11 +318,12 @@ describe('Admin Routes', () => {
 		expect(imageExistsAfterDeletion).toBe(false);
 	  });
 	
+	
 		
 });
 
 
-describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
+describe.only('Integration Test : Auth,Cart, restaurants ' ,  () => {
 	const exampleUser = {
 	  username: 'john_doe',
 	  email: 'john.doe@example.com',
@@ -342,11 +370,12 @@ describe('Integration Test : Auth,Cart, restaurants ' ,  () => {
 
 
 
-describe('Address Routes', ()=> {
+describe.only('Address Routes', ()=> {
 	
 	let user, restaurant,userOwner;
 
     beforeAll(async () => {
+		await clearDatabase();
         user = await User.create({username: 'aman1', password: 'password', email: 'amaaan@gmail.com', phone:12345678, restaurantOwner:true,restaurantName:'Haras' });
         userOwner = await User.create({username: 'ownerName', password: 'password', email: 'amnn@gmail.com', phone: 12345678, restaurantOwner: true});
 		restaurant = await Restaurant.create({name: 'taj', phone: 123, ownerId: userOwner._id});
