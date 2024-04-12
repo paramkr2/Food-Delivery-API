@@ -13,10 +13,10 @@ jobs:
     env:
       DB_URL: 'mongodb://localhost:27017/mydatabase'
       secretKey: 'your_secret_key'
-      
+
     services:
       mongodb:
-        image: mongo:4.4
+        image: mongo:7.0
         ports:
           - 27017:27017
         options: --health-cmd "mongo --eval 'db.stats()'" --health-interval 10s --health-timeout 5s --health-retries 5
