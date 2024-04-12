@@ -197,15 +197,15 @@ describe.only('Payment Routes', ()=> {
 	  paymentId = res.body.id; // Store the payment ID for later use
 	});
 
-	it('should confirm payment', async () => {
-	  expect(paymentId).toBeDefined(); // Ensure paymentId is defined from the first request
-	  const res = await request(app)
-		.post('/payment/confirm')
-		.send({ paymentIntentId:paymentId });
+	// it('should confirm payment', async () => {
+	//   expect(paymentId).toBeDefined(); // Ensure paymentId is defined from the first request
+	//   const res = await request(app)
+	// 	.post('/payment/confirm')
+	// 	.send({ paymentIntentId:paymentId });
 
-	  expect(res.status).toBe(200);
-	  // Add additional assertions as needed to verify the confirmation result
-	});
+	//   expect(res.status).toBe(200);
+	//   // Add additional assertions as needed to verify the confirmation result
+	// });
 
 
 

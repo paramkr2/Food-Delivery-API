@@ -21,6 +21,7 @@ const validateLocation = (location) => {
 export const nearbyRestaurants = async (req, res) => {
   try {
     let { location } = req.query;
+	console.log(location)
 	location = validateLocation(location)
     const query = {
       location: {
@@ -40,18 +41,17 @@ export const nearbyRestaurants = async (req, res) => {
     // Get travel time for each restaurant
     const restaurantPromises = restaurants.map(async (restaurant) => {
     const { coordinates } = restaurant.location;
-    const userLocation = [location.lat,location.lng];
 
     try {
         const response = await axios.get(
-          `https://router.project-osrm.org/route/v1/driving/${userLocation[1]},${userLocation[0]};${coordinates[1]},${coordinates[0]}`
+          `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${coordinates[1]},${coordinates[0]}`
         );
 		
 		// fetch restarant 
 		const restInfo = await Restaurant.findById(restaurant.restaurantId );
         return {
           ...restInfo.toJSON(),
-          travelTime: response.data.routes[0].duration, // Assuming you're interested in travel time
+          travelTime: response.data.routes[0].duration/60, // Assuming you're interested in travel time
         };
       } catch (error) {
         console.error('Error fetching travel time:', error);
