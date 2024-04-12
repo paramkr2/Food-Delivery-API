@@ -11,16 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_URL: 'mongodb://localhost:27017/mydatabase'
+      DB_URL: 'mongodb+srv://fadec82729:AaVr1J1xgamhS8Vm@cluster0.kejrxhn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
       secretKey: 'your_secret_key'
 
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: --health-cmd "mongo --eval 'db.stats()'" --health-interval 10s --health-timeout 5s --health-retries 5
-  
+    
     strategy:
       matrix:
         node-version: [20.x]
