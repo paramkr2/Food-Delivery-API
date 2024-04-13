@@ -1,6 +1,14 @@
 import dotenv from 'dotenv';
-let pathstr = process.env.NODE_ENV==='test'?'var.test.env':'var.env';
+let pathstr = process.env.NODE_ENV==='test'?'.test.env':'.env';
 dotenv.config({path:pathstr});
+
+if( !process.env.DB_URL  ){
+	console.log('Unable to read db_url')
+}
+
+if(!process.env.secretKey){
+	console.log('Unable to read secretKey')
+}
 
 import express from "express";
 import userRoutes from './routes/userRoutes';
