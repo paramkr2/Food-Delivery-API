@@ -14,6 +14,7 @@ import jwt from 'jsonwebtoken'
 const FormData = require('form-data');
 import { Buffer } from 'buffer';
 import fs from 'fs'
+import fs_promise from 'fs/promises';
 import path from 'path'
 
 
@@ -270,6 +271,36 @@ describe.only('Admin Routes', () => {
 	
 	it('should update dish with an image and form data', async () => {
 		
+		const res = await request(app)
+			.post('/admin/update')
+			.set({ Authorization: '123' })
+			.field('dishId',dish._id.toString())
+			.field('name', 'some other name ')
+			.field('restaurantId', restaurant._id.toString())
+			.field('price', String(10))
+			.field('description', 'Some Description')
+			.attach('image',path.resolve(__dirname, '../../images/burger.jpg'));
+			
+		console.log('Item after updating', res.body);
+		expect(res.status).toBe(200)
+		// To confirm image is updloaded we check if the path is diffrent
+		console.log( `Comparing image paths ${res.body.imagePath}  ${dish.imagePath}`)
+		expect( res.body.imagePath != dish.imagePath ).toBe(true)
+		
+		// this still doesnt check if the values are updated 
+		
+		dish = res.body ;
+	});
+
+
+	it('should update dish with an image got deleted somhow  ', async () => {
+		// unlink the file 
+		const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
+		try{
+			await fs_promise.unlink(oldImagePath);
+		}catch(err){
+			console.log('Unable to unlink file ',err)
+		}
 		const res = await request(app)
 			.post('/admin/update')
 			.set({ Authorization: '123' })

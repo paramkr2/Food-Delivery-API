@@ -60,7 +60,11 @@ export const updateItem = async (req, res) => {
 		  // Remove the old image file
 		  if (dish.imagePath) {
 			const oldImagePath = path.join(__dirname, '../../', dish.imagePath); // Construct absolute path
-			await fs.unlink(oldImagePath);
+			try{
+				await fs.unlink(oldImagePath);
+			}catch{
+				console.log('Old image path present but actual file unavailable')
+			}
 		  }
 		  // Update the imagePath with the path of the new image file
 		  dish.imagePath = req.file.path;
