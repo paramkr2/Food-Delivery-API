@@ -21,6 +21,4 @@ const restaurantSchema = new Schema<IRestaurant>({
 const Restaurant = model<IRestaurant>('Restaurant', restaurantSchema);
 
 
-Restaurant.collection.createIndex({ location: '2dsphere' });
-
 export default Restaurant;

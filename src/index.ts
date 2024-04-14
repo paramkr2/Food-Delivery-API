@@ -13,7 +13,6 @@ if(!process.env.secretKey){
 import express from "express";
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes'
-import cartRoutes from './routes/cartRoutes';
 import restaurantRoutes from './routes/restaurantRoutes';
 import paymentRoutes from './routes/paymentRoutes'
 import adminRoutes from './routes/adminRoutes'
@@ -32,7 +31,6 @@ app.use('/payment/webhook', express.raw({type: "*/*"}) ,handleWebhookEvent );
 app.use(express.json());
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
 app.use('/restaurant',restaurantRoutes)
-app.use('/cart',cartRoutes);
 app.use('/payment',paymentRoutes);
 app.use('/admin',adminRoutes);
 app.use('/order',orderRoutes);
