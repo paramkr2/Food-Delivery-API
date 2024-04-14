@@ -1,10 +1,17 @@
-import app from './index'
-import dbconnect from './db/db'
+import app from './index';
+import dbconnect from './db/db';
+
 const port = 8000;
-dbconnect();
 
-app.listen( port , ()=>{
-	console.log(`server running at ${port}`)
-});
+async function startServer() {
+  try {
+    await dbconnect();
+    app.listen(port, () => {
+      console.log(`Server running at ${port}`);
+    });
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+}
 
-export default app ;
+startServer();

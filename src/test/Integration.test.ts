@@ -270,7 +270,6 @@ describe.only('Admin Routes', () => {
 	});
 	
 	it('should update dish with an image and form data', async () => {
-		
 		const res = await request(app)
 			.post('/admin/update')
 			.set({ Authorization: '123' })
@@ -291,6 +290,14 @@ describe.only('Admin Routes', () => {
 		
 		dish = res.body ;
 	});
+
+	it( 'should be able to get image ', async() => {
+
+		const res = await request(app)
+			.get(`/${dish.imagePath}`)
+
+		expect(res.status).toBe(200)
+	})
 
 
 	it('should update dish with an image got deleted somhow  ', async () => {

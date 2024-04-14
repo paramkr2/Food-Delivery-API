@@ -30,7 +30,7 @@ app.use(cors());
 app.use('/payment/webhook', express.raw({type: "*/*"}) ,handleWebhookEvent );
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
 app.use('/restaurant',restaurantRoutes)
 app.use('/cart',cartRoutes);
 app.use('/payment',paymentRoutes);
