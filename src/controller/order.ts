@@ -61,14 +61,18 @@ export const list = async (req, res) => {
 
 
 
+
 export const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.orderId;
+    const {userId} = res.locals;
     let order;
-
+    // add some validation that it is a valid OrderId string later 
     if (orderId === 'recent') {
       // Find the latest order
       order = await Order.find({ userId }).sort({ created_at: -1 }).limit(1);
+      console.log('recent order', order )
+      order = order[0] // because find returns and array 
 
     } else {
       // Find the order by ID
@@ -78,7 +82,7 @@ export const getOrderById = async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
-	console.log('orderbyid', order );
+  console.log('orderbyid', order );
 
     res.status(200).json(order);
   } catch (error) {

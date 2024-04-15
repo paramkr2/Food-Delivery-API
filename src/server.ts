@@ -1,6 +1,6 @@
 import app from './index'
 import dbconnect from './db/db'
-const port = 8000;
+const port = process.env.PORT||8000;
 
 dbconnect();
 
